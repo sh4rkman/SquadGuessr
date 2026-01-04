@@ -1,0 +1,345 @@
+@use '../shared/variables';
+
+#helpDialog {
+    width: 94%;
+    height: 515px;
+    max-width: 600px;
+    font-size: 0.6em;
+    font-weight: bold;
+    #lngSelector {
+        position: absolute;
+        right: 50px;
+        top: 8px;
+        font-weight: bold;
+    }
+    .panel {
+        display: none;
+        &.active {
+            display: block;
+        }
+    }
+    .dropbtn4 {
+        color: #fff;
+        line-height: 1.5em;
+        text-transform: uppercase;
+        text-align: center;
+        background-color: var(--themecolor, variables.$mainBGColor);
+        z-index: 1;
+        width: max-content;
+        min-width: max-content;
+        select {
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: transparent;
+            background-image: none;
+            border: none;
+            box-shadow: none;
+        }
+        &:focus {
+            outline: none;
+        }
+        .select2 {
+            background-color: transparent;
+        }
+        .select2-container {
+            @include variables.text-outline;
+            background-color: transparent;
+            border-bottom: 1px solid variables.$mainTxtColor;
+            line-height: 2.188em;
+            padding-bottom: 0.3em;
+            text-transform: uppercase;
+        }
+    }
+    h3 {
+        font-size: 1.3em;
+    }
+    #panel2 {
+        table {
+            font-size: 0.95em;
+        }
+    }
+    table {
+        border: none;
+        margin: 0 0 1.5em 3em;
+        &.shortcuts {
+            padding-top: 4em;
+            td {           
+                &:nth-child(1) {
+                    padding: 10px 20px 10px 0;
+                }
+            }
+        }
+        &.userSettings {
+            td {
+                padding: 0;
+                border: none;
+                &:nth-child(1) {
+                    width: 30px;
+                }
+            }
+        }
+        .toggleCheckbox {
+            @extend .unselectable;
+            cursor: pointer;
+            &:hover {
+                transition: text-shadow 0.3s ease, color 0.3s ease;
+                text-shadow: 0 0 4px #ffffff75;
+            }
+        }
+        caption {
+            margin: 0 0 10px;
+            color: variables.$mainTxtColor;
+            font-style: normal;
+            font-size: 1.3em;
+            text-align: left;
+            font-family: variables.$mainFont, Times, "Times New Roman", serif;
+        }
+        &#links {
+            bottom: 0;
+            right: 0;
+            position: absolute;
+            width: auto;
+            font-size: 1.6em;
+            float: right;
+            margin: 0 0.5em 0.5em 0;
+            td {
+                border: none;
+                padding: 0 0.4em;
+            }
+            a {
+                margin: 0;
+            }
+            svg {
+                height: 1.1em;
+                width: 1.1em;
+                fill: variables.$mainTxtColor;
+                &:hover {
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    transform: scale(0.9);
+                    fill: variables.$mainColor;
+                }
+            }
+        }
+    }
+    .slidersHolders {
+        width: 100%;
+        height: auto;
+        display: inline-block;
+        .slidersTables {
+            width: 85%;
+            margin: 0 0 0 3em;
+            td {      
+                &:nth-child(1) {
+                    width: 40%;
+                }
+                &:nth-child(2) {
+                    width: 60%;
+                    .slider-wrapper {
+                        position: relative;
+                        height: 37px;
+                        display: flex;
+                        align-items: center;
+                        .ticks {
+                            position: absolute;
+                            width: calc(100% - 16px);
+                            left: 8px;
+                            top: 50%;
+                            height: 0;
+                            pointer-events: none;
+                            .tick {
+                                position: absolute;
+                                transform: translateX(-50%) translateY(-50%);
+                                width: 1px;
+                                height: 8px;
+                                background: #979797;
+                            }
+                            .tick::after {
+                                content: attr(data-value);
+                                position: absolute;
+                                top: 16px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                font-size: 0.8em;
+                                color: #8b8b8b;
+                            }
+                            .default-tick::after {
+                                color: #aaa;
+                            }
+                        }           
+                        input[type="range"] {
+                            width: 100%;
+                            height: 2px;
+                            border-radius: 1px;
+                            outline: none;
+                            position: relative;
+                            z-index: 1;
+                            cursor: pointer;
+                        }
+                        input[type="range"]::-webkit-slider-thumb {
+                            -webkit-appearance: none;
+                            width: 16px;
+                            height: 16px;
+                            background: linear-gradient(135deg, variables.$mainColor 0%, variables.$mainColor 100%);
+                            border: 2px solid rgba(255, 255, 255, 0.1);
+                            border-radius: 50%;
+                            cursor: pointer;
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(178, 34, 34, 0);
+                            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        }
+                        input[type="range"]::-webkit-slider-thumb:hover {
+                            transform: scale(1.15);
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(178, 34, 34, 0.2);
+                            border-color: rgba(255, 255, 255, 0.2);
+                        }
+                        input[type="range"]::-moz-range-thumb {
+                            width: 16px;
+                            height: 16px;
+                            background: linear-gradient(135deg, variables.$mainColor 0%, variables.$mainColor 100%);
+                            border: 1px solid rgba(255, 255, 255, 0.7);
+                            border-radius: 50%;
+                            cursor: pointer;
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(178, 34, 34, 0);
+                            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        }
+                        input[type="range"]::-moz-range-thumb:hover {
+                            transform: scale(1.15);
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(178, 34, 34, 0.2);
+                            border-color: rgba(255, 255, 255, 0.2);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+.new {
+    @extend .unselectable;
+    color: red;
+    text-transform: uppercase;
+    letter-spacing: 0;
+}
+
+
+$bezier: cubic-bezier(0.65, 0.25, 0.56, 0.96);
+
+.mcui-checkbox,
+.mcui-radio {
+    display: flex;
+    align-items: center;
+    user-select: none;
+    padding: 0.313em 0;
+    box-sizing: border-box;
+    input[type="checkbox"],
+    input[type="radio"] {
+        position: absolute !important;
+        height: 1px;
+        width: 1px;
+        overflow: hidden;
+        clip: rect(1px, 1px, 1px, 1px);
+    }
+    input[type="checkbox"] + span,
+    input[type="radio"] + span {
+        border: 2px solid variables.$mainColor;
+        height: 1.5em;
+        width: 1.5em;
+        box-sizing: border-box;
+        border-radius: 2px;
+        position: relative;
+        background-color: white;
+    }
+    input[type="checkbox"]:checked + span {
+        border-color: variables.$mainColor;
+        transition: border-color 107ms $bezier;
+        .mcui-check {
+            opacity: 1;
+            transition: opacity 107ms $bezier;
+            polyline {
+            animation: dash-check 107ms $bezier forwards;
+            }
+        }
+    }
+    input[type="checkbox"]:disabled + span {
+        background-color: grey;
+        border: none;
+        pointer-events: none;
+        .mcui-check {
+            color: #111;
+        }
+    }
+    input[type="checkbox"]:not(:disabled) + span:active {
+        transform: scale(0.9);
+    }
+}
+
+.mcui-check {
+    height: 100%;
+    width: 100%;
+    transform: scale(1);
+    color: variables.$mainColor;
+    opacity: 0;
+    &:hover:not([disabled]){
+        cursor: pointer;
+    }
+    polyline {
+      fill: none;
+      transform-origin: 50% 50%;
+      stroke-width: 5px;
+      stroke-dasharray: 22.7714;
+      stroke: currentcolor;
+    }
+}
+  
+@supports (display: grid) {
+    .mcui-check {
+        polyline {
+            stroke-dashoffset: 22.7714;
+        }
+    }
+}
+
+#settingsControls {
+    margin: 0 0 1.3em;
+    text-align: center;
+    width: 100%;
+    button {
+        color: variables.$mainBGColor;
+        width: 28%;
+        margin-bottom: 1em;
+        vertical-align: middle;
+        height: 18px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, width 0.3s ease;
+        span {
+            vertical-align: middle;
+            display: inline-flex;
+        }
+        &:hover {
+            background-color: grey;
+        }
+        &.active {
+            background-color: variables.$mainColor;
+            color: variables.$mainTxtColor;
+            padding-bottom: 0;
+            height: 25px;
+            width: 33%;
+            svg {
+                display: inline-block;
+                fill: variables.$mainTxtColor;
+            }
+        }
+        svg {
+            height: 1.5em;
+            width: 1.5em;
+            display: none;
+            fill: variables.$mainBGColor;
+            &#flagsvg{
+                height: 1.2em;
+                width: 1.2em;
+            }
+        }
+    }
+}

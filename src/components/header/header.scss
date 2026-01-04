@@ -1,0 +1,23 @@
+@use "../shared/variables";
+
+header {
+    height: 12vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    #MAINLOGO {
+        letter-spacing: 1px;
+        font-size: 3em;
+        font-family: variables.$logoFont;
+        cursor: pointer;
+        position: relative;
+
+        #guessr {
+            background: variables.$mainColor;
+            padding: 0 5px;
+            margin-left: 5px;
+            display: inline-block;
+        }
+    }
+}

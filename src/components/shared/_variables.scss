@@ -1,0 +1,286 @@
+// Colors
+$mainColor: #11447e;
+$mainColorLight: #1557a0;
+$mainBGColor: #111;
+$mainTxtColor: #fff;
+$newColor: green;
+
+
+// :root {
+//     --main-color: #{$mainColor}; // Interpolation so we can use this color in JS
+// }
+
+// Fonts
+$mainFont: montserrat;
+$logoFont: oswald;
+
+
+/*
+   * -- BASE STYLES --
+*/
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+body,
+html,
+button,
+input,
+select,
+textarea,
+caption {
+    color: $mainTxtColor;
+    font-family: $mainFont, Times, "Times New Roman", serif;
+    letter-spacing: 0.1em;
+    text-align: center;
+}
+
+body {
+    background-color: var(--themecolor, $mainBGColor);
+    overflow: hidden;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+img {
+    @extend .unselectable;
+    display: block;
+    margin: auto;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+}
+
+input {
+    background: transparent;
+    border: 0;
+    border-bottom: 3px solid $mainTxtColor;
+    font-size: 1.1em;
+    font-weight: bold;
+    height: 30px;
+    line-height: 2.188em;
+    padding: 0;
+    text-transform: uppercase;
+    width: 100%;
+    &:focus {
+        outline: none;
+    }
+    &::selection {
+        background-color: $mainColor;
+    }
+}
+
+
+button {
+    background: $mainColor;
+    color: $mainTxtColor;
+    border: none;
+    //padding: 0.8em 2.2em;
+    //font-size: 2em;
+    font-weight: bold;
+    border-radius: 15px;
+    cursor: pointer;
+    //box-shadow: 0 8px 24px rgba(17, 68, 126, 0.4);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    &:hover {
+        //transform: translateY(-2px);
+        //box-shadow: 0 12px 32px rgba(17, 68, 126, 0.6);
+        background: $mainColorLight;
+    }
+    &:active {
+        transform: translateY(0);
+    }
+    &:disabled {
+        background-color: rgba(73, 73, 73, 0.842);
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+}
+
+button:focus {
+    outline: none;
+}
+
+main {
+    height: 80vh;
+    background: rgb(22, 22, 22);
+    //padding: 2em;
+}
+
+@keyframes loading {
+    0% {
+        background-position: right bottom;
+    }
+    100% {
+        background-position: left bottom;
+    }
+}
+
+
+// Text-Shadows/Ouline
+@mixin text-outline {
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #111,
+    -1px 1px 0 #111,
+    1px -1px 0 #111,
+    -1px -1px 0 #111,
+   0 1px 0 #111,
+    0 -1px 0 #111,
+    -1px 0 0 #111,
+    1px 0 0 #111,
+    1px 2px 0 #111,
+    -1px 2px 0 #111,
+    1px -2px 0 #111,
+    -2px -2px 0 #111,
+    0 2px 0 #111,
+    0 -2px 0 #111,
+    -1px 0 0 #111,
+    1px 0 0 #111,
+    1px 1px 0 #111,
+    -1px 1px 0 #111,
+    1px -1px 0 #111,
+    -1px -1px 0 #111,
+    1px 2px 0 #111,
+    -1px 1px 0 #111,
+    1px -1px 0 #111,
+    -1px -1px 0 #111;
+}
+
+@mixin light-text-outline {
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #111,
+    -1px 1px 0 #111,
+    1px -1px 0 #111,
+    -1px -1px 0 #111,
+   0 1px 0 #111,
+    0 -1px 0 #111,
+    -1px 0 0 #111,
+    1px 0 0 #111,
+    1px 1px 0 #111,
+    -1px 1px 0 #111,
+    1px -1px 0 #111,
+    -1px -1px 0 #111,
+    0 1px 0 #111,
+    0 -1px 0 #111,
+    -1px 0 0 #111,
+    1px 0 0 #111,
+    1px 1px 0 #111,
+    -1px 1px 0 #111,
+    1px -1px 0 #111,
+    -1px -1px 0 #111,
+    1px 1px 0 #111,
+    -1px 1px 0 #111,
+    1px -1px 0 #111,
+    -1px -1px 0 #111;
+}
+
+.unselectable {
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+// .animate__animated {
+//     &.animate__fadeInDown {
+//         --animate-duration: 0.2s;
+//     }
+//     &.animate__fadeInRight, &.animate__fadeInLeft {
+//         --animate-duration: 0.2s;
+//         svg {
+//             --animate-duration: 0.5s;
+//         }
+//     }
+//     &.animate__fadeIn {
+//         --animate-duration: 1s;
+//     }
+//     &.animate__shakeX {
+//         --animate-duration: 0.5s;
+//     }
+//     &.animate__headShake {
+//         --animate-duration: 0.4s;
+//     }
+//     &.animate__zoomIn {
+//         --animate-duration: 0.15s;
+//     }
+// }
+
+// #helpDialog.animate__animated {
+//     &.animate__fadeIn {
+//         --animate-duration: 3.1s;
+        
+//     }
+// }
+
+/**************************************
+*  Animations
+***************************************/
+
+// @keyframes blink {
+//     50% {
+//         opacity: 0.25;
+//     }
+// }
+
+// @keyframes appear {
+//     100% {
+//         opacity: 1;
+//         transform: none;
+//     }
+// }
+
+// @keyframes dash-check {
+//     to {
+//         stroke-dashoffset: 0;
+//     }
+// }
+
+// @keyframes target-appear {
+//     0% {
+//         top: -600px;
+//     }
+//     100% {
+//         top: 0;
+//     }
+// }
+
+// @keyframes spread-appear {
+//     0% {
+//         opacity: 0;
+//     }
+//     100% {
+//         opacity: 1;
+//     }
+// }
+
+// @keyframes weapon-appear {
+//     0% {
+//         top: -10px;
+//         opacity: 0;
+//     }
+//     100% {
+//         top: 0;
+//         opacity: 1;
+//     }
+// }
+
+// @keyframes loading {
+//     0% {
+//         background-position: right bottom;
+//     }
+//     100% {
+//         background-position: left bottom;
+//     }
+// }
+

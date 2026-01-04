@@ -1,0 +1,80 @@
+{
+  "name": "squadcalc",
+  "version": "0.1.0",
+  "description": "A Complete Mortar Calculator and Map Lane Finder for Squad",
+  "author": "Maxime 'sharkman' Boussard",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "squad",
+    "squadcalc",
+    "mortar",
+    "calculator",
+    "lane",
+    "map"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git:/github.com/sh4rkman/SquadCalc"
+  },
+  "homepage": "https://squadcalc.app/",
+  "bugs": {
+    "url": "https://github.com/sh4rkman/SquadCalc/issues"
+  },
+  "private": false,
+  "jshintConfig": {
+    "esversion": 11
+  },
+  "scripts": {
+    "start": "webpack serve -c ./config/webpack.config.js",
+    "build": "webpack -c ./config/webpack.config.js",
+    "lint": "stylelint -c ./config/.stylelintrc.json ./src/**/*.scss && htmlhint --config ./config/.htmlhintrc.json --nocolor ./src/ && jshint ./src/ && eslint --fix -c ./config/.eslintrc.js ./src/",
+    "mapinfo": "node src/js/data/maps.js mapinfo"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.15",
+    "@types/node": "^22.10.3",
+    "animate.css": "^4.1.1",
+    "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^7.0.0",
+    "dotenv-webpack": "^8.1.0",
+    "eslint": "^9.17.0",
+    "fs-extra": "^11.2.0",
+    "fuse.js": "^7.1.0",
+    "html-loader": "^5.1.0",
+    "html-webpack-plugin": "^5.6.3",
+    "htmlhint": "^1.1.4",
+    "i18next": "^24.2.0",
+    "i18next-http-backend": "^3.0.1",
+    "jquery": "^3.7.1",
+    "jshint": "^2.13.6",
+    "leaflet": "^2.0.0-alpha.1",
+    "leaflet-loader": "^0.0.3",
+    "mini-css-extract-plugin": "^2.9.2",
+    "mkdirp": "^3.0.1",
+    "path": "^0.12.7",
+    "postcss": ">=8.4.49",
+    "purecss": "^3.0.0",
+    "robotstxt-webpack-plugin": "^8.0.0",
+    "sass": "^1.83.0",
+    "sass-loader": "^16.0.4",
+    "select2": "^4.1.0-rc.0",
+    "sharp": "^0.33.5",
+    "spin.js": "^4.1.2",
+    "style-loader": "^4.0.0",
+    "stylelint": "^16.12.0",
+    "stylelint-config-standard-scss": "^14.0.0",
+    "tippy.js": "^6.3.7",
+    "uuid": "^11.0.5",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0",
+    "webpack-merge": "^6.0.1",
+    "webpack-pwa-manifest": "^4.3.0",
+    "workbox-webpack-plugin": "^7.3.0"
+  },
+  "overrides": {
+    "phin": "^3.7.1"
+  }
+}

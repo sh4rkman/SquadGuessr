@@ -1,0 +1,12 @@
+mortar.code-workspace
+.vscode/
+.env
+debug.log
+node_modules/
+dist/
+public/dist/
+config/test-results/
+*.Identifier
+/.idea
+maintenance.enable
+/.fastRequest
