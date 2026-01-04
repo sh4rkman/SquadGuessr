@@ -1,8 +1,5 @@
 @use "../shared/variables";
 
-// @use "../../views/main";
-
-
 #menu {
     height: 75vh;
     display: flex;
@@ -10,6 +7,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
+
     &.hidden {
         display: none;
     }
@@ -26,7 +24,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 
@@ -52,13 +52,16 @@ h2 {
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
+
     &:hover {
         box-shadow: 0 8px 12px rgba(17, 68, 126, 0.4);
         border-color: variables.$mainColor;
     }
+
     &.selected {
         border-color: variables.$mainColor;
         background: rgba(17, 68, 126, 0.15);
+
         &::before {
             content: '✓';
             position: absolute;
@@ -101,6 +104,7 @@ h2 {
     font-size: 16px;
     color: #888;
     font-weight: 600;
+
     span {
         color: #fbff00;
         font-weight: bold;
@@ -110,23 +114,46 @@ h2 {
 .play-button {
     padding: 18px 64px;
     font-size: 2em;
+
     &:disabled {
         opacity: 0.7;
         cursor: not-allowed;
     }
 }
 
-@media (width <= 600px) {
-    // #menu {
-    //     padding: 32px 24px;
-    // }
+
+
+@media (width <=600px) {
+    #menu {
+        min-height: auto; // Allow natural height on mobile
+        padding: 32px 24px;
+        justify-content: flex-start; // Align to top instead of center
+    }
+
+    h2 {
+        font-size: 1em;
+        margin-bottom: 24px;
+    }
+
     h1 {
         font-size: 28px;
         margin-bottom: 32px;
     }
-    .game-modes {
-        grid-template-columns: 1fr;
+
+    .mode-card {
+        padding: 16px;
     }
+
+    .mode-icon {
+        font-size: 36px;
+        margin-bottom: 8px;
+    }
+
+    .mode-name {
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+
     .play-button {
         padding: 16px 48px;
         font-size: 20px;

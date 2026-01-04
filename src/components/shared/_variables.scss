@@ -6,11 +6,6 @@ $mainTxtColor: #fff;
 $newColor: green;
 
 
-// :root {
-
-//     --main-color: #{$mainColor}; // Interpolation so we can use this color in JS
-
-// }
 
 // Fonts
 $mainFont: montserrat;
@@ -46,8 +41,18 @@ body {
     overflow: hidden;
 }
 
-a:visited {
+
+a {
+    color: #fff;
     text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    }
+    &:visited {
+        color: $mainTxtColor;
+        border-color: #111;
+        text-decoration: none;
+    }
 }
 
 // img {
@@ -90,12 +95,15 @@ button {
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
+
     &:hover {
         background: $mainColorLight;
     }
+
     &:active {
         transform: translateY(0);
     }
+
     &:disabled {
         background-color: rgba(73, 73, 73, 0.842);
         cursor: not-allowed;
@@ -113,6 +121,7 @@ button:focus {
     0% {
         background-position: right bottom;
     }
+
     100% {
         background-position: left bottom;
     }
@@ -123,57 +132,57 @@ button:focus {
 @mixin text-outline {
     font-weight: bold;
     text-shadow: 1px 1px 0 #111,
-    -1px 1px 0 #111,
-    1px -1px 0 #111,
-    -1px -1px 0 #111,
-   0 1px 0 #111,
-    0 -1px 0 #111,
-    -1px 0 0 #111,
-    1px 0 0 #111,
-    1px 2px 0 #111,
-    -1px 2px 0 #111,
-    1px -2px 0 #111,
-    -2px -2px 0 #111,
-    0 2px 0 #111,
-    0 -2px 0 #111,
-    -1px 0 0 #111,
-    1px 0 0 #111,
-    1px 1px 0 #111,
-    -1px 1px 0 #111,
-    1px -1px 0 #111,
-    -1px -1px 0 #111,
-    1px 2px 0 #111,
-    -1px 1px 0 #111,
-    1px -1px 0 #111,
-    -1px -1px 0 #111;
+        -1px 1px 0 #111,
+        1px -1px 0 #111,
+        -1px -1px 0 #111,
+        0 1px 0 #111,
+        0 -1px 0 #111,
+        -1px 0 0 #111,
+        1px 0 0 #111,
+        1px 2px 0 #111,
+        -1px 2px 0 #111,
+        1px -2px 0 #111,
+        -2px -2px 0 #111,
+        0 2px 0 #111,
+        0 -2px 0 #111,
+        -1px 0 0 #111,
+        1px 0 0 #111,
+        1px 1px 0 #111,
+        -1px 1px 0 #111,
+        1px -1px 0 #111,
+        -1px -1px 0 #111,
+        1px 2px 0 #111,
+        -1px 1px 0 #111,
+        1px -1px 0 #111,
+        -1px -1px 0 #111;
 }
 
 @mixin light-text-outline {
     font-weight: bold;
     text-shadow: 1px 1px 0 #111,
-    -1px 1px 0 #111,
-    1px -1px 0 #111,
-    -1px -1px 0 #111,
-   0 1px 0 #111,
-    0 -1px 0 #111,
-    -1px 0 0 #111,
-    1px 0 0 #111,
-    1px 1px 0 #111,
-    -1px 1px 0 #111,
-    1px -1px 0 #111,
-    -1px -1px 0 #111,
-    0 1px 0 #111,
-    0 -1px 0 #111,
-    -1px 0 0 #111,
-    1px 0 0 #111,
-    1px 1px 0 #111,
-    -1px 1px 0 #111,
-    1px -1px 0 #111,
-    -1px -1px 0 #111,
-    1px 1px 0 #111,
-    -1px 1px 0 #111,
-    1px -1px 0 #111,
-    -1px -1px 0 #111;
+        -1px 1px 0 #111,
+        1px -1px 0 #111,
+        -1px -1px 0 #111,
+        0 1px 0 #111,
+        0 -1px 0 #111,
+        -1px 0 0 #111,
+        1px 0 0 #111,
+        1px 1px 0 #111,
+        -1px 1px 0 #111,
+        1px -1px 0 #111,
+        -1px -1px 0 #111,
+        0 1px 0 #111,
+        0 -1px 0 #111,
+        -1px 0 0 #111,
+        1px 0 0 #111,
+        1px 1px 0 #111,
+        -1px 1px 0 #111,
+        1px -1px 0 #111,
+        -1px -1px 0 #111,
+        1px 1px 0 #111,
+        -1px 1px 0 #111,
+        1px -1px 0 #111,
+        -1px -1px 0 #111;
 }
 
 .unselectable {

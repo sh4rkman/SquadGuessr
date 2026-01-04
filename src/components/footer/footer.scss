@@ -31,12 +31,15 @@ footer {
     }
 
     #footerLogos {
-        font-size: 2em;
+        font-size: 0.6em;
+        letter-spacing: 2px;
         display: flex;
         justify-content: center;
         flex: 1;
-
+        gap: 1em;
+        align-items: center;
         svg {
+            font-size: 3em;
             height: 1.1em;
             width: 1.1em;
             fill: variables.$mainTxtColor;
