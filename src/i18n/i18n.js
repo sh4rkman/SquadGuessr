@@ -1,5 +1,4 @@
 import i18next from "i18next";
-//import HttpApi from "i18next-http-backend";
 //import { App } from "../app.js";
 import enCommon from "./en/common.json";
 
@@ -13,10 +12,7 @@ export function loadLanguage(LANGUAGES) {
         fallbackLng: "en",
         ns: [ "common" ],
         defaultNS: "common",
-        debug: true,
-        // backend: {
-        //     loadPath: "./{{lng}}/{{ns}}.json",
-        // },
+        debug: false,
         resources: {
             en: {
                 common: enCommon

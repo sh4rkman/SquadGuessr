@@ -147,8 +147,6 @@ export default class SquadCalc {
             })
             .then(response => {
                 if (!response) return;
-                
-                console.log(response);
                 this.initializeGameState(response);
                 this.loadNextGuess();
                 this.switchUI("game");
@@ -208,6 +206,7 @@ export default class SquadCalc {
         this.currentGuess = this.gameData[this.gamePhase];
         this.INPUT_GUESS.val("");
         $("#mapName").hide();
+        this.solutionMarker = null;
 
         this.setupMap();
         this.setupHint();
@@ -409,7 +408,7 @@ export default class SquadCalc {
     }
 
     onTimeAttackEnd() {
-        console.log("⏰ Time attack finished");
+        console.debug("⏰ Time attack finished");
         this.BUTTON_GUESS.trigger("click");
     }
 
@@ -648,7 +647,7 @@ export default class SquadCalc {
     // ===== MAP VISUALIZATION =====
 
     createSolutionMarker(latLng) {
-        new solutionMarker(latLng, {}, this).addTo(this.minimap.markersGroup);
+        this.solutionMarker = new solutionMarker(latLng, {}, this).addTo(this.minimap.markersGroup);
     }
 
     drawSolutionDistance(latLng) {

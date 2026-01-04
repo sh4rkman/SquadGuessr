@@ -187,6 +187,8 @@ export const squadMinimap = Map.extend({
      * @param {LatLng} latlng - coordinates of the new weapon
      **/
     createGuessMarker(latlng){
+        if (App.solutionMarker) return;
+        
         if (!this.guessMarker && App.selectedMode != "mapFinder") {
             this.guessMarker = new guessMarker(latlng, {}, this).addTo(this.markersGroup);
             App.BUTTON_GUESS.prop("disabled", false);
