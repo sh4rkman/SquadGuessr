@@ -4,10 +4,8 @@ import webpack from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
-import WebpackPwaManifest from 'webpack-pwa-manifest';
 import RobotstxtPlugin from 'robotstxt-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import workbox from 'workbox-webpack-plugin';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
