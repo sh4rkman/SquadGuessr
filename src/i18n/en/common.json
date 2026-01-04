@@ -1,0 +1,28 @@
+{
+    "menu": {
+        "buttons": {
+            "play": "PLAY"
+        }
+    },
+    "game": {
+        "km": "km",
+        "m": "m",
+        "buttons": {
+            "guess": "GUESS",
+            "next": "NEXT",
+            "results": "RESULTS"
+        }
+    },
+    "results": {
+        "guesses": "Guesses",
+        "finalscore": "Final Score",
+        "buttons": {
+            "playagain": "PLAY AGAIN"
+        }
+    },
+    "shared": {
+        "points": "Points"
+    },
+    "play": "test",
+    "desc": "a Game about a Game"
+}

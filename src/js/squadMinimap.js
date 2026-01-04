@@ -1,8 +1,7 @@
-import { ImageOverlay, Map, CRS, SVG, Util, LayerGroup, Popup, LatLngBounds, LatLng, Browser } from "leaflet";
+import { ImageOverlay, Map, CRS, SVG, Util, LayerGroup, Popup, LatLngBounds, Browser } from "leaflet";
 import { App } from "../app.js";
 import { guessMarker } from "./guessMarker.js";
 import "./libs/leaflet-smoothWheelZoom.js";
-import "tippy.js/dist/tippy.css";
 import "./libs/leaflet-edgebuffer.js";
 import "./libs/leaflet-spin.js";
 
@@ -37,12 +36,12 @@ export const squadMinimap = Map.extend({
             zoom: 2,
             zoomControl: true,
             zoomSnap: 0,
-            smoothSensitivity: App.userSettings.zoomSensitivity,
-            scrollWheelZoom: App.userSettings.smoothMap,
-            smoothWheelZoom: !App.userSettings.smoothMap,
-            wheelPxPerZoomLevel: 120 / App.userSettings.zoomSensitivity,
-            inertia: App.userSettings.smoothMap,
-            zoomAnimation: App.userSettings.smoothMap,
+            smoothSensitivity: 2,
+            scrollWheelZoom: false,
+            smoothWheelZoom: true,
+            wheelPxPerZoomLevel: 60,
+            inertia: false,
+            zoomAnimation: false,
         };
 
         Util.setOptions(this, customOptions);
@@ -90,18 +89,6 @@ export const squadMinimap = Map.extend({
         }
 
         this.on("contextmenu", this._handleContextMenu, this);
-        this.on("zoomend", this._handleZoom, this);
-
-        if (App.userSettings.keypadUnderCursor && App.hasMouse){
-            this.on("pointermove", this._handleMouseMove, this);
-            this.on("pointerout", this._handleMouseOut, this);
-        }
-
-
-        this.drawing = false;
-        this.drawingMode = false;
-        this.currentLine = null;
-        this.points = [];
 
     },
 
@@ -123,7 +110,7 @@ export const squadMinimap = Map.extend({
     /**
      * remove existing layer and replace it
      */
-    changeLayer: function(changemap = false) {
+    changeLayer: function() {
         const OLDLAYER = this.activeLayer;
 
         // Show spinner
@@ -138,17 +125,11 @@ export const squadMinimap = Map.extend({
         $(this.activeLayer.getElement()).css("opacity", 0);
         
         this.activeLayer.once("load", () => {
-            if (App.userSettings.highQualityImages) {
+            // Animate the opacity of the new layer
+            $(this.activeLayer.getElement()).fadeTo(700, 1, () => {
                 if (OLDLAYER) OLDLAYER.remove();
                 this.spin(false);
-            }
-            else {
-                // Animate the opacity of the new layer
-                $(this.activeLayer.getElement()).fadeTo(700, 1, () => {
-                    if (OLDLAYER) OLDLAYER.remove();
-                    this.spin(false);
-                });
-            }
+            });
         });
 
         this.activeLayer.once("error", (e) => {
@@ -206,7 +187,7 @@ export const squadMinimap = Map.extend({
      * @param {LatLng} latlng - coordinates of the new weapon
      **/
     createGuessMarker(latlng){
-        if (!this.guessMarker && App.selectedMode != 'mapFinder') {
+        if (!this.guessMarker && App.selectedMode != "mapFinder") {
             this.guessMarker = new guessMarker(latlng, {}, this).addTo(this.markersGroup);
             App.BUTTON_GUESS.prop("disabled", false);
         } else {
@@ -221,7 +202,7 @@ export const squadMinimap = Map.extend({
      * @param {event} event
      */
     _handleclick: function(event) {
-        this.logLatLng(event.latlng)
+        this.logLatLng(event.latlng);
         if (!this.imageBounds.contains(event.latlng)) return;
         this.createGuessMarker(event.latlng);
     },
@@ -248,13 +229,5 @@ export const squadMinimap = Map.extend({
         if (!this.imageBounds.contains(event.latlng)) return;
         this.createGuessMarker(event.latlng);
     },
-
-
-    /**
-     * map zoomend event handler
-     */
-    _handleZoom: function() {
-    },
-
 
 });

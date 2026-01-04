@@ -5,14 +5,13 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-
     #MAINLOGO {
+        @extend .unselectable;
         letter-spacing: 1px;
         font-size: 3em;
         font-family: variables.$logoFont;
         cursor: pointer;
         position: relative;
-
         #guessr {
             background: variables.$mainColor;
             padding: 0 5px;

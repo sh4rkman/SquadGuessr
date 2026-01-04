@@ -3,12 +3,13 @@ import "animate.css";
 import "leaflet/dist/leaflet.css";
 
 // Local Styles
+
+import "./components/index.scss";
 import "./components/header/header.scss";
 import "./components/menu/menu.scss";
 import "./components/game/game.scss";
 import "./components/results/results.scss";
 import "./components/footer/footer.scss";
-
 import "./components/shared/_variables.scss";
 import "./components/game/mapLogo.scss";
 

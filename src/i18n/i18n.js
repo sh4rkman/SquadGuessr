@@ -1,6 +1,7 @@
 import i18next from "i18next";
-import HttpApi from "i18next-http-backend";
-import { App } from "../app.js";
+//import HttpApi from "i18next-http-backend";
+//import { App } from "../app.js";
+import enCommon from "./en/common.json";
 
 /**
  * Update every label with the correct localization text
@@ -8,12 +9,18 @@ import { App } from "../app.js";
 export function loadLanguage(LANGUAGES) {
     //const LANG_SELECTOR = $(".dropbtn4");
 
-    i18next.use(HttpApi).init({
-        fallbackLng: false,
+    i18next.init({
+        fallbackLng: "en",
         ns: [ "common" ],
-        debug: false,
-        backend: {
-            loadPath: "./locales/{{lng}}/{{ns}}.json",
+        defaultNS: "common",
+        debug: true,
+        // backend: {
+        //     loadPath: "./{{lng}}/{{ns}}.json",
+        // },
+        resources: {
+            en: {
+                common: enCommon
+            }
         }
     }, function(err) {
         if (err) return console.error(err);
@@ -36,6 +43,7 @@ export function loadLanguage(LANGUAGES) {
     //     localStorage.setItem("settings-language", this.value);
     //     $("html").attr("lang", this.value);
     // });
+    updateContent();
 }
 
 /**
@@ -58,7 +66,7 @@ function getLanguage(LANGUAGES){
         localStorage.setItem("settings-language", language);
     }
 
-    $(".dropbtn4").val(language).trigger("change");
+    //$(".dropbtn4").val(language).trigger("change");
 }
 
 /**
@@ -84,37 +92,4 @@ function updateContent() {
             }
         });
     });
-
-    if (App.minimap.layer) App.minimap.layer.polyline.updateMeasurements();
-   
-    $(".dropbtn").select2("destroy").select2({
-        dropdownCssClass: "dropbtn",
-        dropdownParent: $("#mapSelector"),
-        minimumResultsForSearch: -1,
-    });
-
-    $(".dropbtn2").select2("destroy").select2({
-        dropdownCssClass: "dropbtn",
-        dropdownParent: $("#weaponSelector"),
-        minimumResultsForSearch: -1,
-    });
-
-    $(".dropbtn3").select2("destroy").select2({
-        dropdownCssClass: "dropbtn",
-        dropdownParent: $("#ammoSelector"),
-        minimumResultsForSearch: -1,
-    });
-
-    let layerPlaceholder = i18next.t("common:layerPlaceholder");
-    let factionPlaceholder = i18next.t("common:faction");
-    let unitPlaceholder = i18next.t("common:unit");
-
-    $(".dropbtn5").select2("destroy").select2({
-        dropdownCssClass: "dropbtn",
-        dropdownParent: $("#layerSelector"),
-        allowClear: true,
-        placeholder: layerPlaceholder,
-        minimumResultsForSearch: -1,
-    });
-    
 }

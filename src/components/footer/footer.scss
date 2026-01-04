@@ -1,50 +1,59 @@
 @use "../shared/variables";
-//@use "../../views/main";
 
 /***************************************
 ************   FOOTER   ***************
 **************************************/
 
-#score {
-    #totalPoints {
-        font-size: 3em;
-        margin-right: 5px
-    }
-}
-
-#timerWrapper {
-    font-size: 3em;
-}
-
-#footerLogos {
-    //border: solid red 1px;
-    font-size: 2em;
-    svg {
-        height: 1.1em;
-        width: 1.1em;
-        fill: variables.$mainTxtColor;
-        &:hover {
-            cursor: pointer;
-            transition: all 0.2s ease;
-            transform: scale(0.9);
-            fill: variables.$mainColor;
-        }
-    }
-}
-
 footer {
-    //border: solid green 4px;
+    // border: solid green 4px;
     height: 8vh;
     width: 100vw;
     bottom: 0;
     left: 0;
     position: fixed;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     flex-direction: row;
     gap: 5em;
+
+    #score {
+        padding-left: 2em;
+
+        #totalPoints {
+            font-size: 3em;
+        }
+    }
+
+    #timerWrapper {
+        font-size: 3em;
+        padding-right: 1em;
+    }
+
+    #footerLogos {
+        font-size: 2em;
+        display: flex;
+        justify-content: center;
+        flex: 1;
+
+        svg {
+            height: 1.1em;
+            width: 1.1em;
+            fill: variables.$mainTxtColor;
+
+            &:hover {
+                cursor: pointer;
+                transition: all 0.2s ease;
+                transform: scale(0.9);
+                fill: variables.$mainColor;
+            }
+        }
+    }
 }
+
+
+
+
 
 
 
@@ -65,7 +74,7 @@ $toastDistanceFromBottom: 40px;
     border-radius: 5px;
     overflow: hidden;
     background: white;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     z-index: 5;
     bottom: 0;
     left: 50%;
@@ -74,7 +83,7 @@ $toastDistanceFromBottom: 40px;
     visibility: hidden;
 }
 
-#icon-wrapper{
+#icon-wrapper {
     width: 30px;
     height: 30px;
     background: var(--secondary);
@@ -91,7 +100,8 @@ $toastDistanceFromBottom: 40px;
     position: relative;
 }
 
-#icon::before, #icon::after {
+#icon::before,
+#icon::after {
     position: absolute;
     content: "";
     background: var(--secondary);
@@ -104,7 +114,8 @@ $toastDistanceFromBottom: 40px;
     padding: 5px 20px 5px 10px;
 }
 
-#toast-message h4, #toast-message p {
+#toast-message h4,
+#toast-message p {
     margin: 0;
     line-height: 1.2em;
 }
@@ -129,15 +140,16 @@ $toastDistanceFromBottom: 40px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    background: rgba(0,0,0,0);
+    background: rgba(0, 0, 0, 0);
     transition: background 0.2s ease-in-out;
 }
 
 #toast-close:hover {
-    background: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
 
-#toast-close::before, #toast-close::after {
+#toast-close::before,
+#toast-close::after {
     position: absolute;
     content: '';
     height: 12px;
@@ -149,7 +161,8 @@ $toastDistanceFromBottom: 40px;
     transition: background 0.2s ease-in-out;
 }
 
-#toast-close:hover::before, #toast-close:hover::after {
+#toast-close:hover::before,
+#toast-close:hover::after {
     background: #404040;
 }
 
@@ -163,31 +176,33 @@ $toastDistanceFromBottom: 40px;
 
 @keyframes close {
     from {
-    bottom: $toastDistanceFromBottom;
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-    visibility: visible;
+        bottom: $toastDistanceFromBottom;
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+        visibility: visible;
     }
+
     to {
-    bottom: 0;
-    opacity: 0;
-    transform: translateX(-50%) scale(0.5);
-    visibility: hidden;
+        bottom: 0;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+        visibility: hidden;
     }
 }
 
 @keyframes open {
     from {
-    bottom: 0;
-    opacity: 0;
-    transform: translateX(-50%) scale(0.5);
-    visibility: hidden;
+        bottom: 0;
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5);
+        visibility: hidden;
     }
+
     to {
-    bottom: $toastDistanceFromBottom;
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-    visibility: visible;
+        bottom: $toastDistanceFromBottom;
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+        visibility: visible;
     }
 }
 
@@ -208,11 +223,12 @@ $toastDistanceFromBottom: 40px;
 
 @keyframes countdown {
     from {
-    width: 100%;
-    } 
+        width: 100%;
+    }
+
     to {
-    width: 0%;
-    } 
+        width: 0%;
+    }
 }
 
 /* ----------------------- */
@@ -228,13 +244,13 @@ $toastDistanceFromBottom: 40px;
     transform: rotate(-45deg);
 }
 
-.success  #icon::before{
+.success #icon::before {
     width: 10px;
     height: 3px;
     transform: translate(calc(-50% + 1px), calc(-50% + 1px));
 }
 
-.success  #icon::after{
+.success #icon::after {
     width: 3px;
     height: 6px;
     transform: translate(calc(-50% - 3px), calc(-50% - 1px));
@@ -249,13 +265,13 @@ $toastDistanceFromBottom: 40px;
     --secondary: #FFEEDF;
 }
 
-.warning  #icon::before{
+.warning #icon::before {
     width: 3px;
     height: 3px;
     transform: translate(-50%, calc(-50% + 4px));
 }
 
-.warning  #icon::after{
+.warning #icon::after {
     width: 3px;
     height: 7px;
     transform: translate(-50%, calc(-50% - 2px));
@@ -270,13 +286,13 @@ $toastDistanceFromBottom: 40px;
     --secondary: #FFEAEC;
 }
 
-.error  #icon::before{
+.error #icon::before {
     width: 3px;
     height: 3px;
     transform: translate(-50%, calc(-50% + 4px));
 }
 
-.error  #icon::after{
+.error #icon::after {
     width: 3px;
     height: 7px;
     transform: translate(-50%, calc(-50% - 2px));
@@ -291,45 +307,50 @@ $toastDistanceFromBottom: 40px;
     --secondary: #CFEFFC;
 }
 
-.info  #icon::before{
+.info #icon::before {
     width: 3px;
     height: 7px;
     transform: translate(-50%, calc(-50% + 2px));
 }
 
-.info  #icon::after{
+.info #icon::after {
     width: 3px;
     height: 3px;
     transform: translate(-50%, calc(-50% - 4px));
 }
 
 // main button {
+
 //     padding: 0.6em 1.5em;
+
 //     font-size: 18px;
+
 //     border-radius: 5px;
+
 //     cursor: pointer;
+
 // }
 
-#successBtn { 
-    border: 1px solid #2DD743; 
+#successBtn {
+    border: 1px solid #2DD743;
     color: #2DD743;
     background: #E3FEE6;
 }
 
-#warningBtn { 
-    border: 1px solid #F29208; 
+#warningBtn {
+    border: 1px solid #F29208;
     color: #F29208;
     background: #FFEEDF;
 }
 
-#errorBtn { 
-    border: 1px solid #E63435; 
+#errorBtn {
+    border: 1px solid #E63435;
     color: #E63435;
     background: #FFEAEC;
 }
 
-#infoBtn { 
-    border: 1px solid #42C0F2; 
+#infoBtn {
+    border: 1px solid #42C0F2;
     color: #42C0F2;
     background: #CFEFFC;
 }

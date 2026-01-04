@@ -81,9 +81,9 @@ import { Marker, Polyline, Polygon, LayerGroup, Util, Layer, DomUtil, Circle } f
         } else {
             if (d > 1000) {
                 d = d / 1000;
-                unit = i18next.t("common:km");
+                unit = i18next.t("common:game.km");
             } else {
-                unit = i18next.t("common:m");
+                unit = i18next.t("common:game.m");
             }
         }
 

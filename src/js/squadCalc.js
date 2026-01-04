@@ -1,6 +1,6 @@
 import { MAPS, initMapsProperties } from "./data/maps.js";
 import { squadMinimap } from "./squadMinimap.js";
-import { loadLanguage } from "./localization.js";
+import { loadLanguage } from "../i18n/i18n.js";
 import { Polyline, LatLngBounds } from "leaflet";
 import SquadSettings from "./squadSettings.js";
 import packageInfo from "../../package.json";
@@ -35,13 +35,12 @@ export default class SquadCalc {
     }
 
     initializeElements() {
-        this.MAP_SELECTOR = $(".dropbtn");
         this.BUTTON_NEXT = $("#BUTTON_NEXT");
         this.BUTTON_GUESS = $("#BUTTON_GUESS");
         this.BUTTON_NEWGAME = $("#BUTTON_PLAY");
         this.BUTTON_RESULTS = $("#BUTTON_RESULTS");
         this.BUTTON_PLAYAGAIN = $("#BUTTON_PLAYAGAIN");
-        this.MAIN_LOGO = $('#MAINLOGO');
+        this.MAIN_LOGO = $("#MAINLOGO");
         this.INPUT_GUESS = $("#searchMap");
     }
 
@@ -60,8 +59,8 @@ export default class SquadCalc {
         this.userSettings.init();
         this.loadMinimap();
         this.loadUI();
-        //this.loadTheme();
-        this.selectMode('classic', 60);
+        //updateContent();
+        this.selectMode("classic", 60);
     }
 
     setupEventListeners() {
@@ -73,10 +72,10 @@ export default class SquadCalc {
     }
 
     setupModeSelection() {
-        document.querySelectorAll('.mode-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const mode = card.getAttribute('data-mode');
-                const timer = card.getAttribute('data-timer');
+        document.querySelectorAll(".mode-card").forEach(card => {
+            card.addEventListener("click", () => {
+                const mode = card.getAttribute("data-mode");
+                const timer = card.getAttribute("data-timer");
                 this.selectMode(mode, timer);
             });
         });
@@ -97,39 +96,40 @@ export default class SquadCalc {
         });
     }
 
+
     setupImageOverlay() {
-        const icon = document.querySelector('.preview-icon');
-        const hint = document.getElementById('hint');
-        const overlay = document.getElementById('imageOverlay');
-        const overlayImg = document.getElementById('overlayImage');
+        const icon = document.querySelector(".preview-icon");
+        const hint = document.getElementById("hint");
+        const overlay = document.getElementById("imageOverlay");
+        const overlayImg = document.getElementById("overlayImage");
 
         const showOverlay = () => {
             overlayImg.src = hint.src;
-            overlay.classList.remove('hidden');
+            overlay.classList.remove("hidden");
         };
 
-        const hideOverlay = () => overlay.classList.add('hidden');
+        const hideOverlay = () => overlay.classList.add("hidden");
 
-        icon?.addEventListener('click', showOverlay);
-        hint?.addEventListener('click', showOverlay);
-        overlay?.addEventListener('click', hideOverlay);
+        icon?.addEventListener("click", showOverlay);
+        hint?.addEventListener("click", showOverlay);
+        overlay?.addEventListener("click", hideOverlay);
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') hideOverlay();
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") hideOverlay();
         });
     }
 
     setupGuessInput() {
         // Enable/disable guess button based on input text
-        this.INPUT_GUESS.on('input', () => {
-            const hasText = this.INPUT_GUESS.val().trim() !== '';
-            this.BUTTON_GUESS.prop('disabled', !hasText);
+        this.INPUT_GUESS.on("input", () => {
+            const hasText = this.INPUT_GUESS.val().trim() !== "";
+            this.BUTTON_GUESS.prop("disabled", !hasText);
         });
         
         // Handle Enter key to submit
-        this.INPUT_GUESS.on('keypress', (e) => {
-            if (e.key === 'Enter' && !this.BUTTON_GUESS.prop('disabled')) {
-                this.BUTTON_GUESS.trigger('click');
+        this.INPUT_GUESS.on("keypress", (e) => {
+            if (e.key === "Enter" && !this.BUTTON_GUESS.prop("disabled")) {
+                this.BUTTON_GUESS.trigger("click");
             }
         });
     }
@@ -203,7 +203,7 @@ export default class SquadCalc {
     }
 
     loadNextGuess() {
-        $("#text").css('visibility', 'hidden');
+        $("#text").css("visibility", "hidden");
 
         this.currentGuess = this.gameData[this.gamePhase];
         this.INPUT_GUESS.val("");
@@ -217,10 +217,10 @@ export default class SquadCalc {
 
         if (this.selectedTimer > 0) this.startTimeAttackTimer(this.selectedTimer);
 
-        if (this.selectedMode === 'mapFinder') {
-            $('#gameWrapper').addClass('no-map');
+        if (this.selectedMode === "mapFinder") {
+            $("#gameWrapper").addClass("no-map");
         } else {
-            $('#gameWrapper').removeClass('no-map');
+            $("#gameWrapper").removeClass("no-map");
         }
 
     }
@@ -250,7 +250,7 @@ export default class SquadCalc {
         
         this.stopTimer();
 
-        if (this.selectedMode === 'mapFinder') {
+        if (this.selectedMode === "mapFinder") {
             this.handleMapGuess();
         } else {
             if (!this.minimap.guessMarker) {
@@ -275,12 +275,12 @@ export default class SquadCalc {
         mapName = mapName.charAt(0).toUpperCase() + mapName.slice(1);
 
         $("#points").html(points);
-        $("#mapName").html(icon + " " + mapName).show();
+        $("#mapName").html(icon + " " + mapName).fadeIn();
         this.gameData[this.gamePhase - 1].points = points;
         this.addToTotalPoints(points);
         this.BUTTON_GUESS.prop("disabled", true);
         this.BUTTON_NEXT.prop("disabled", false);
-        $('#gameWrapper').removeClass('no-map');
+        $("#gameWrapper").removeClass("no-map");
         const solutionLatLng = this.getSolutionLatLng();
         this.minimap.invalidateSize();
         this.createSolutionMarker(solutionLatLng);
@@ -291,7 +291,7 @@ export default class SquadCalc {
 
     levenshtein(a, b) {
 
-        function normalize(str) { return str.toLowerCase().trim().replace(/\s+/g, ' '); }
+        function normalize(str) { return str.toLowerCase().trim().replace(/\s+/g, " "); }
         
         a = normalize(a);
         b = normalize(b);
@@ -315,7 +315,7 @@ export default class SquadCalc {
     handleNoGuess() {
         const solutionLatLng = this.getSolutionLatLng();
         $("#points").html(0);
-        $("#text").css('visibility', 'visible');
+        $("#text").css("visibility", "visible");
         this.createSolutionMarker(solutionLatLng);
         this.focusOnSolution(solutionLatLng);
         this.gameData[this.gamePhase - 1].points = 0;
@@ -347,7 +347,7 @@ export default class SquadCalc {
     }
 
     displayResultsGrid() {
-        const $grid = $('.maps-grid');
+        const $grid = $(".maps-grid");
         $grid.empty();
 
         this.gameData.forEach(guess => {
@@ -369,9 +369,9 @@ export default class SquadCalc {
     checkNewRecord() {
         if (this.score > this.topScores[this.selectedMode]) {
             this.topScores[this.selectedMode] = this.score;
-            $('.new-record').show();
+            $(".new-record").fadeIn();
         } else {
-            $('.new-record').hide();
+            $(".new-record").hide();
         }
     }
 
@@ -409,7 +409,7 @@ export default class SquadCalc {
     }
 
     onTimeAttackEnd() {
-        console.log('⏰ Time attack finished');
+        console.log("⏰ Time attack finished");
         this.BUTTON_GUESS.trigger("click");
     }
 
@@ -446,29 +446,29 @@ export default class SquadCalc {
     }
 
     selectMode(mode, timer = 0) {
-        document.querySelectorAll('.mode-card').forEach(card => {
-            card.classList.remove('selected');
+        document.querySelectorAll(".mode-card").forEach(card => {
+            card.classList.remove("selected");
         });
-        document.querySelector(`[data-mode="${mode}"]`)?.classList.add('selected');
+        document.querySelector(`[data-mode="${mode}"]`)?.classList.add("selected");
         this.selectedMode = mode;
         this.selectedTimer = timer;
     }
 
     setButtonLoading(button, isLoading) {
         if (isLoading) {
-            button.data('original-text', button.html());
+            button.data("original-text", button.html());
             button.prop("disabled", true);
-            button.html('<span class="spinner"></span> Loading...');
+            button.html("<span class=\"spinner\"></span> Loading...");
         } else {
             button.prop("disabled", false);
-            button.html(button.data('original-text') || button.html());
+            button.html(button.data("original-text") || button.html());
         }
     }
 
     // ===== SCORING SYSTEM =====
 
     loadTopScores() {
-        const modes = ['classic', 'timeAttack', 'mapFinder'];
+        const modes = ["classic", "timeAttack", "mapFinder"];
         this.topScores = {};
         modes.forEach(mode => { this.topScores[mode] = this.getStoredScore(mode);});
         this.updateScoreDisplay();
@@ -479,7 +479,7 @@ export default class SquadCalc {
         let value = localStorage.getItem(key);
         
         if (value === null) {
-            localStorage.setItem(key, '0');
+            localStorage.setItem(key, "0");
             return 0;
         }
         
@@ -525,7 +525,7 @@ export default class SquadCalc {
     displaySolutionResults(distance, points) {
         $("#dist").html(this.formatDistance(distance));
         $("#points").html(points);
-        $("#text").css('visibility', 'visible');
+        $("#text").css("visibility", "visible");
     }
 
 
@@ -582,45 +582,45 @@ export default class SquadCalc {
     }
 
 
-getPoints(distance) {
+    getPoints(distance) {
     // base thresholds for a 3000x3000 map
-    const baseSteps = [
-        { maxDistance: 20, points: 100, icon: "! 💯" },
-        { maxDistance: 50, points: 80, icon: "! 🌟"  },
-        { maxDistance: 100, points: 60, icon: "👏🏼"  },
-        { maxDistance: 200, points: 40, icon: "👍🏼" },
-        { maxDistance: 300, points: 20, icon: "😐" },
-        { maxDistance: 500, points: 10, icon: ".. 🤨" },
-    ];
-    const mapSize = this.minimap.activeMap.size; // e.g., 3000
-    const scale = mapSize / 3000; // 1 for base map, >1 for bigger maps, <1 for smaller
+        const baseSteps = [
+            { maxDistance: 20, points: 100, icon: "! 💯" },
+            { maxDistance: 50, points: 80, icon: "! 🌟"  },
+            { maxDistance: 100, points: 60, icon: "👏🏼"  },
+            { maxDistance: 200, points: 40, icon: "👍🏼" },
+            { maxDistance: 300, points: 20, icon: "😐" },
+            { maxDistance: 500, points: 10, icon: ".. 🤨" },
+        ];
+        const mapSize = this.minimap.activeMap.size; // e.g., 3000
+        const scale = mapSize / 3000; // 1 for base map, >1 for bigger maps, <1 for smaller
     
-    // scale thresholds
-    const steps = baseSteps.map(s => ({
-        maxDistance: s.maxDistance * scale,
-        points: s.points,
-        icon: s.icon
-    }));
+        // scale thresholds
+        const steps = baseSteps.map(s => ({
+            maxDistance: s.maxDistance * scale,
+            points: s.points,
+            icon: s.icon
+        }));
     
-    let points;
-    let icon = ""; // Add this to track the icon
+        let points;
+        let icon = ""; // Add this to track the icon
     
-    if (distance <= steps[0].maxDistance) {
-        points = steps[0].points;
-        icon = steps[0].icon;
-    } else if (distance > steps[steps.length - 1].maxDistance) {
-        points = 0;
-        icon = "... ❌"; // Or whatever icon you want for 0 points
-    } else {
-        points = this.interpolatePoints(distance, steps);
-        // Find the appropriate icon based on distance
-        icon = steps.find(s => distance <= s.maxDistance)?.icon || "";
+        if (distance <= steps[0].maxDistance) {
+            points = steps[0].points;
+            icon = steps[0].icon;
+        } else if (distance > steps[steps.length - 1].maxDistance) {
+            points = 0;
+            icon = "... ❌"; // Or whatever icon you want for 0 points
+        } else {
+            points = this.interpolatePoints(distance, steps);
+            // Find the appropriate icon based on distance
+            icon = steps.find(s => distance <= s.maxDistance)?.icon || "";
+        }
+    
+        this.gameData[this.gamePhase - 1].points = points;
+        $("#mapName").html(points + " points " + icon).fadeIn(); // Use icon variable
+        return points;
     }
-    
-    this.gameData[this.gamePhase - 1].points = points;
-    $("#mapName").html(points + " points " + icon).show(); // Use icon variable
-    return points;
-}
 
 
     interpolatePoints(distance, steps) {
@@ -688,37 +688,6 @@ getPoints(distance) {
         });
     }
 
-    // ===== THEME & STYLING =====
-
-    // loadTheme() {
-    //     this.mainColor = getComputedStyle(document.documentElement)
-    //         .getPropertyValue("--main-color")
-    //         .trim();
-    // }
-
-    // changeIconsSize() {
-    //     this.minimap.activeMarkers.eachLayer((marker) => {
-    //         marker.updateIconSize();
-    //     });
-    // }
-
-    // changeFontSize() {
-    //     this.userSettings.fontSize = parseInt(this.userSettings.fontSize, 10) || 1;
-
-    //     const fontSizes = {
-    //         1: 0.8,
-    //         2: 0.9,
-    //         3: 1.0,
-    //         4: 1.1,
-    //         5: 1.2
-    //     };
-
-    //     const fontSize = fontSizes[this.userSettings.fontSize] || 1.0;
-    //     const root = document.documentElement;
-    //     root.style.setProperty("--font-size-objtext", `${fontSize}em`);
-    //     root.style.setProperty("--font-size-calc-popup", `${fontSize - 0.1}em`);
-    // }
-
     // ===== MAP MANAGEMENT =====
 
     loadMinimap() {
@@ -733,10 +702,7 @@ getPoints(distance) {
     }
 
     loadUI() {
-        const helpDialog = document.querySelector("#helpDialog");
-        $(".teamRight").attr('src', "/img/USMC.PNG");
-        $(".teamLeft").attr('src', "/img/RGF.PNG");
-        this.closeDialogOnClickOutside(helpDialog);
+        //this.closeDialogOnClickOutside(helpDialog);
         this.setupToast();
         this.setupUIControls();
         this.show();
@@ -829,7 +795,7 @@ getPoints(distance) {
     }
 
 
-      // updateUrlParams(updates = {}) {
+    // updateUrlParams(updates = {}) {
     //     const urlParams = new URLSearchParams(window.location.search);
 
     //     // Apply updates

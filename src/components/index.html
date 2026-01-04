@@ -3,7 +3,7 @@
 
         <head>
 
-            <title data-i18n="common:squadcalc">SquadCalc</title>
+            <title>SquadGuessr</title>
 
             <meta data-i18n-content="common:desc" name="description" content="">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1">
@@ -11,14 +11,14 @@
             <meta charset="utf-8">
 
             <!-- SOCIAL MEDIA -->
-            <meta property="og:title" content="SquadCalc">
+            <meta property="og:title" content="SquadGuessr">
             <meta data-i18n-content="common:desc" property="og:description" content="">
             <meta property="og:image" content="https://i.imgur.com/MIYQv6D.png">
-            <meta property="og:url" content="https://squadcalc.app">
+            <meta property="og:url" content="https://squadguessr.app">
             <meta name="twitter:card" content="https://i.imgur.com/MIYQv6D.png">
 
             <!-- FAVICON -->
-            <link rel="shortcut icon" type="image/x-icon" href="/img/favicons/icon_96x96.png">
+            <link rel="shortcut icon" type="image/x-icon" href="/img/favicons/icon_512x512.png">
 
             <!-- FONT/ICON -->
             <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,19 +36,22 @@
 
         <body style="visibility: hidden;">
 
-            
             <!-- HEADER / LOADER -->
-            <%= require('html-loader!./components/header/header.html').default %>
+            <%= require('html-loader!./header/header.html').default %>
 
             <!-- MAIN PAGES -->
             <main>
-                <%= require('html-loader!./components/menu/menu.html').default %>
-                <%= require('html-loader!./components/game/game.html').default %>
-                <%= require('html-loader!./components/results/results.html').default %>
+                <%= require('html-loader!./menu/menu.html').default %>
+                <%= require('html-loader!./game/game.html').default %>
+                <%= require('html-loader!./results/results.html').default %>
             </main>
 
             <!-- FOOTER / TOASTS -->
-            <%= require('html-loader!./components/footer/footer.html').default %>
+            <%= require('html-loader!./footer/footer.html').default %>
+            
+            <div id="imageOverlay" class="hidden">
+                <img id="overlayImage">
+            </div>
 
         </body>
 

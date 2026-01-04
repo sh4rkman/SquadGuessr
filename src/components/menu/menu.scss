@@ -1,5 +1,6 @@
 @use "../shared/variables";
-//@use "../../views/main";
+
+// @use "../../views/main";
 
 
 #menu {
@@ -13,6 +14,7 @@
         display: none;
     }
 }
+
 .spinner {
     display: inline-block;
     width: 14px;
@@ -114,20 +116,17 @@ h2 {
     }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
     // #menu {
     //     padding: 32px 24px;
     // }
-
     h1 {
         font-size: 28px;
         margin-bottom: 32px;
     }
-
     .game-modes {
         grid-template-columns: 1fr;
     }
-
     .play-button {
         padding: 16px 48px;
         font-size: 20px;

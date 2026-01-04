@@ -84,7 +84,7 @@ export default async (env) => {
     plugins: [
         new Dotenv(),
         new HtmlWebpackPlugin({
-          template: './src/index.html',
+          template: './src/components/index.html',
           minify: env.WEBPACK_BUILD ? {
               collapseWhitespace: true,
               removeComments: true,
@@ -97,12 +97,7 @@ export default async (env) => {
               // Public Assets
               from: path.resolve(__dirname, '../public'),
               to: path.resolve(__dirname, '../dist'),
-            },
-            { 
-              // PWA ScreenShots
-              from: "./src/img/github/",
-              to: "../dist/img/pwa/", 
-            },
+            }
           ],
         }),
         new webpack.ProvidePlugin({
@@ -110,87 +105,6 @@ export default async (env) => {
         }),
         new RobotstxtPlugin({
           policy: robotstxtPolicy,
-        }),
-        new WebpackPwaManifest({
-          name: 'SquadCalc',
-          short_name: 'SquadCalc',
-          start_url: "/",
-          description: 'A Complete Mortar Calculator for Squad',
-          background_color: '#111111',
-          publicPath : './',
-          fingerprints: false,
-          theme_color: '#FFFFFF',
-          inject: true,
-          ios: true,
-          crossorigin: 'use-credentials',
-          icons: [
-            { 
-              // Regular FavIcon
-              src: path.resolve('./src/img/favicons/favicon_512x512.png'),
-              sizes: [16, 32, 96, 192, 256, 384, 512],
-              destination: path.join('img', 'favicons'),
-              purpose: 'maskable'
-            },
-            { 
-              // PWA Installation icon
-              src: path.resolve('./src/img/favicons/favicon_512x512.png'),
-              size: '192x192',
-              destination: path.join('img', 'favicons'),
-              purpose: 'any'
-            }
-
-          ],
-          screenshots : [
-            {
-              "src": "/img/pwa/mobile_ui.webp",
-              "sizes": "748x1568",
-              "type": "image/webp",
-              "form_factor": "narrow",
-              "label": "Map View"
-            },
-            {
-              "src": "/img/pwa/mobile.webp",
-              "sizes": "748x1568",
-              "type": "image/webp",
-              "form_factor": "narrow",
-              "label": "Minimalist/keyboard friendly calculator"
-            },
-            {
-              "src": "/img/pwa/desktop_ui_1.webp",
-              "sizes": "800x553",
-              "type": "image/webp",
-              "form_factor": "wide",
-              "label": "Map Mode"
-            },
-            {
-              "src": "/img/pwa/desktop_ui_2.webp",
-              "sizes": "800x553",
-              "type": "image/webp",
-              "form_factor": "wide",
-              "label": "Topographic maps"
-            },           
-            {
-              "src": "/img/pwa/desktop_ui_3.webp",
-              "sizes": "800x553",
-              "type": "image/webp",
-              "form_factor": "wide",
-              "label": "Weapon Stats"
-            },
-            {
-              "src": "/img/pwa/desktop_ui_4.webp",
-              "sizes": "800x553",
-              "type": "image/webp",
-              "form_factor": "wide",
-              "label": "Target Stats"
-            },
-            {
-              "src": "/img/pwa/desktop_ui_0.webp",
-              "sizes": "800x553",
-              "type": "image/webp",
-              "form_factor": "wide",
-              "label": "Legacy Mode"
-            },
-          ]
         }),
     ],
     performance: {
