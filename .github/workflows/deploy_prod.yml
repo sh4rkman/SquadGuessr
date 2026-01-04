@@ -1,0 +1,29 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/${{ secrets.SSH_PUBLIC_KEY_NAME }}
+            cd ${{ secrets.DIST }}
+            git pull origin master
+            npm ci
+            npm run build
