@@ -23,7 +23,7 @@ jobs:
           script: |
             eval $(ssh-agent -s)
             ssh-add ~/.ssh/${{ secrets.SSH_PUBLIC_KEY_NAME }}
-            export NVM_DIR="$HOME/.nvm"
+            source ~/.zshrc
             cd ${{ secrets.DIST }}
             git pull origin master
             npm ci
