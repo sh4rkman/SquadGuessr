@@ -457,7 +457,7 @@ export default class SquadCalc {
         if (isLoading) {
             button.data("original-text", button.html());
             button.prop("disabled", true);
-            button.html("<span class=\"spinner\"></span> Loading...");
+            button.html(`<span class=\"spinner\"></span> ${i18next.t("menu.buttons.loading", { ns: "common" })}...`);
         } else {
             button.prop("disabled", false);
             button.html(button.data("original-text") || button.html());
@@ -591,7 +591,7 @@ export default class SquadCalc {
             { maxDistance: 300, points: 20, icon: "😐" },
             { maxDistance: 500, points: 10, icon: ".. 🤨" },
         ];
-        const mapSize = this.minimap.activeMap.size; // e.g., 3000
+        const mapSize = this.minimap.activeMap.size;
         const scale = mapSize / 3000; // 1 for base map, >1 for bigger maps, <1 for smaller
     
         // scale thresholds
@@ -617,7 +617,7 @@ export default class SquadCalc {
         }
     
         this.gameData[this.gamePhase - 1].points = points;
-        $("#mapName").html(points + " points " + icon).fadeIn(); // Use icon variable
+        $("#mapName").html(`${points} ${i18next.t("shared.points", { ns: "common" })} ${icon}`).fadeIn();
         return points;
     }
 

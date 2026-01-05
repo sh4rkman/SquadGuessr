@@ -1,12 +1,14 @@
 {
     "menu": {
         "buttons": {
-            "play": "PLAY"
+            "play": "PLAY",
+            "loading": "LOADING"
         }
     },
     "game": {
         "km": "km",
         "m": "m",
+        "guessPlaceHolder": "Enter your guess...",
         "buttons": {
             "guess": "GUESS",
             "next": "NEXT",
@@ -21,8 +23,10 @@
         }
     },
     "shared": {
+        "submitFeature": "Submit your ideas",
+        "reportBug": "Report a bug",
+        "discord": "Join the Discord",
         "points": "Points"
     },
-    "play": "test",
     "desc": "Find where the screenshot has been taken"
 }
