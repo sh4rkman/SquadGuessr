@@ -65,6 +65,10 @@
     &.no-map {
         justify-content: center;
 
+        #hint {
+            max-height: 50vh;
+        }
+
         #leftSide {
             display: none;
         }
@@ -73,9 +77,9 @@
             max-width: 400px;
             width: 100%;
 
-            #preview #hint {
-                max-width: 300px;
-            }
+            // #preview #hint {
+            //     max-width: 500px;
+            // }
 
             #actions #searchMap {
                 display: block;
@@ -118,6 +122,7 @@
     #gameWrapper {
         padding: 1em;
         gap: 1em;
+
         &:not(.no-map) {
 
             flex-direction: column;
@@ -136,7 +141,6 @@
 
                 #preview {
                     flex: 1;
-
                     .preview-wrapper {
                         display: flex;
                         max-width: 100%;
