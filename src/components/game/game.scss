@@ -47,9 +47,10 @@
 }
 
 #gameWrapper {
+    border: solid red 1px;
     display: flex;
     gap: 3em;
-    height: 80vh;
+    height: 80dvh;
     padding: 4em;
 
     .leaflet-control-zoom-in,

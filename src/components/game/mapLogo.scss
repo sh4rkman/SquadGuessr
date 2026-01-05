@@ -5,8 +5,8 @@
 .logo {
     @extend .unselectable;
     position: fixed;
-    height: 100vh;
-    width: 100vw;
+    height: 100dvh;
+    width: 100dvw;
     display: table;
     font-family: variables.$logoFont, Times, "Times New Roman", serif;
     text-transform: uppercase;

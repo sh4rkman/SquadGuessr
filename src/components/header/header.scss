@@ -1,7 +1,7 @@
 @use "../shared/variables";
 
 header {
-    height: 12vh;
+    height: 12dvh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,7 +34,7 @@ header {
 
 @media (width <=768px) {
     header {
-        height: 10vh;
+        height: 10dvh;
         font-size: 0.65em;
         #MAINLOGO {
             #beta {

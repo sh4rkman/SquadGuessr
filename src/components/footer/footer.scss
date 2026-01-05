@@ -5,7 +5,7 @@
 **************************************/
 
 footer {
-    height: 8vh;
+    height: 8dvh;
     width: 100vw;
     bottom: 0;
     left: 0;
@@ -359,7 +359,7 @@ $toastDistanceFromBottom: 40px;
 
 @media (width <=768px) {
     footer {
-        height: 6vh;
+        height: 6dvh;
         font-size: 0.75em;
     } 
 }

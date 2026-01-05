@@ -65,7 +65,7 @@
 
 .maps-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 140px);
+    grid-template-columns: repeat(5, 2fr);
     justify-content: center;
     gap: 12px;
     margin-bottom: 40px;
@@ -112,7 +112,7 @@
         font-size: 64px;
     }
     .maps-grid {
-        // grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(3, 2fr);
         gap: 8px;
     }
     .play-again-btn {

@@ -1,7 +1,8 @@
 @use "../shared/variables";
 
 #menu {
-    height: 75vh;
+    height: 100%;
+    border: solid red 1px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -125,9 +126,9 @@ h2 {
 
 @media (width <=600px) {
     #menu {
-        min-height: auto; // Allow natural height on mobile
-        padding: 32px 24px;
-        justify-content: flex-start; // Align to top instead of center
+        min-height: auto;
+        padding: 0 14px;
+        //justify-content: flex-start; // Align to top instead of center
     }
 
     h2 {
@@ -140,8 +141,13 @@ h2 {
         margin-bottom: 32px;
     }
 
+    .game-modes {
+        margin-bottom: 20px;
+        gap: 10px;
+    }
+
     .mode-card {
-        padding: 16px;
+        padding: 10px;
     }
 
     .mode-icon {
@@ -150,8 +156,16 @@ h2 {
     }
 
     .mode-name {
-        font-size: 20px;
+        font-size: 14px;
         margin-bottom: 12px;
+    }
+
+    .mode-description {
+        font-size: 10px;
+    }
+
+    .top-score {
+        font-size: 10px;
     }
 
     .play-button {
