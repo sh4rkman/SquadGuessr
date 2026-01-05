@@ -209,18 +209,20 @@ export default class SquadCalc {
         this.solutionMarker = null;
 
         this.setupMap();
-        this.setupHint();
+
         this.updateRoundDisplay();
         this.disableButtons();
         this.gamePhase++;
-
-        if (this.selectedTimer > 0) this.startTimeAttackTimer(this.selectedTimer);
 
         if (this.selectedMode === "mapFinder") {
             $("#gameWrapper").addClass("no-map");
         } else {
             $("#gameWrapper").removeClass("no-map");
         }
+
+        this.setupHint().then(() => {
+            if (this.selectedTimer > 0) this.startTimeAttackTimer(this.selectedTimer);
+        });
 
     }
 
@@ -232,7 +234,31 @@ export default class SquadCalc {
     }
 
     setupHint() {
-        $("#hint").attr("src", `/api/v2${this.currentGuess.url}`);
+        
+        return new Promise((resolve) => {
+            const $hint = $("#hint");
+            $hint.off("load error");
+            $hint.hide();
+            $hint.attr("src", "");
+            $hint.attr("src", `/api/v2${this.currentGuess.url}`);
+
+
+            // Check if already loaded (cached)
+            if ($hint[0].complete && $hint[0].naturalHeight !== 0) {
+                resolve();
+            } else {
+
+                $hint.on("load", () => {
+                    $hint.fadeIn(1200)
+                    resolve();
+                });
+
+                $hint.on("error", (err) => {
+                    console.error("Failed to load hint image", err);
+                    resolve(); // Resolve anyway to not block the timer
+                });
+            }
+        });
     }
 
     updateRoundDisplay() {
@@ -438,7 +464,7 @@ export default class SquadCalc {
         const state = uiStates[page];
         if (!state) return;
         
-        state.show.forEach(selector => $(selector).fadeIn(1200));
+        state.show.forEach(selector => $(selector).fadeIn(400));
         state.hide.forEach(selector => $(selector).hide());
         $("#score").prop("hidden", state.scoreHidden);
         $("#mapName").hide();
@@ -457,7 +483,7 @@ export default class SquadCalc {
         if (isLoading) {
             button.data("original-text", button.html());
             button.prop("disabled", true);
-            button.html(`<span class=\"spinner\"></span> ${i18next.t("menu.buttons.loading", { ns: "common" })}...`);
+            button.html(`<span class="spinner"></span> ${i18next.t("menu.buttons.loading", { ns: "common" })}...`);
         } else {
             button.prop("disabled", false);
             button.html(button.data("original-text") || button.html());

@@ -42,19 +42,6 @@ body {
 }
 
 
-a {
-    color: #fff;
-    text-decoration: none;
-    &:hover {
-        text-decoration: underline;
-    }
-    &:visited {
-        color: $mainTxtColor;
-        border-color: #111;
-        text-decoration: none;
-    }
-}
-
 // img {
 //     @extend .unselectable;
 //     display: block;

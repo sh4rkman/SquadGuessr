@@ -58,6 +58,7 @@
         color: white;
 
         &.leaflet-disabled {
+            cursor: not-allowed;
             background-color: #204e83;
         }
     }
@@ -147,6 +148,10 @@
                         cursor: pointer;
                         border-radius: 10px;
                     }
+                    #hint-wrapper {
+                        min-height: 100px;
+                        width: 100%;
+                    }
                 }
 
                 #actions {
@@ -184,17 +189,27 @@
 
     #preview {
         flex: 1;
-
+        
         .preview-wrapper {
             position: relative;
-            display: inline-block;
+            display: block;
+        }
+
+        #hint-wrapper {
+            max-width: 100%;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 10px;
+            background-color: rgba(73, 73, 73, 0.842);
+            overflow: hidden;
         }
 
         #hint {
-            display: block;
             max-width: 100%;
+            min-height: 100px;
+            aspect-ratio: 1 / 1;
             cursor: pointer;
-            border-radius: 10px;
+            background-color: rgba(73, 73, 73, 0.842);
         }
 
         #round {

@@ -48,7 +48,7 @@ h2 {
     background: #272727;
     border: 3px solid #333;
     border-radius: 16px;
-    padding: 20px;
+    padding: 20px 20px 0;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
@@ -56,6 +56,10 @@ h2 {
     &:hover {
         box-shadow: 0 8px 12px rgba(17, 68, 126, 0.4);
         border-color: variables.$mainColor;
+        .mode-description {
+            transition: opacity ease-in 0.2s;
+            opacity: 100;
+        }
     }
 
     &.selected {
@@ -98,6 +102,7 @@ h2 {
     color: #aaa;
     margin-bottom: 16px;
     line-height: 1.4;
+    opacity: 0;
 }
 
 .top-score {
@@ -146,7 +151,7 @@ h2 {
     }
 
     .mode-card {
-        padding: 10px;
+        padding: 10px 10px 0;
     }
 
     .mode-icon {

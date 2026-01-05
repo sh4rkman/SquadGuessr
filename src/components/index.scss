@@ -1,7 +1,6 @@
 main {
     height: 80dvh;
     background: rgb(22, 22, 22);
-
     #menu,
     #map_ui,
     #results {
@@ -21,11 +20,9 @@ main {
     justify-content: center;
     z-index: 9999;
     cursor: pointer;
-
     &.hidden {
         display: none;
     }
-
     img {
         max-width: 90vw;
         max-height: 90dvh;

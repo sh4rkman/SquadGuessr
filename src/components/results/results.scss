@@ -78,7 +78,7 @@
     border: solid rgb(51, 51, 51) 1px;
     transition: transform 0.3s ease;
     position: relative;
-    cursor: pointer;
+    cursor: default;
     &:hover {
         transform: scale(1.05);
     }
@@ -99,10 +99,29 @@
 
 }
 
-#BUTTON_PLAYAGAIN {
-    padding: 18px 48px;
-    font-size: 20px;
+.button-container {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    button {
+        padding: 18px 48px;
+        font-size: 20px;
+    }
+
+    #BUTTON_SHARE {
+        padding: 14px 24px;
+        svg {
+            //border: solid red 1px;
+            width: 30px;
+            height: 30px;
+            fill: white;
+            stroke: none;
+        }
+    }
 }
+
+
 
 @media (width <= 600px) {
     #results {

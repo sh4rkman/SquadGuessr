@@ -19,7 +19,8 @@
         "guesses": "Guesses",
         "finalscore": "Final Score",
         "buttons": {
-            "playagain": "PLAY AGAIN"
+            "playagain": "PLAY AGAIN",
+            "share": "SHARE"
         }
     },
     "shared": {
