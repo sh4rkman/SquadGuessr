@@ -74,9 +74,9 @@
             max-width: 400px;
             width: 100%;
 
-            #preview #hint {
-                max-width: 300px;
-            }
+            // #preview #hint {
+            //     //max-width: 300px;
+            // }
 
             #actions #searchMap {
                 display: block;
@@ -119,37 +119,45 @@
 @media (width <=768px) {
     #gameWrapper {
         padding: 1em;
-        flex-direction: column;
+        gap: 1em;
+        &:not(.no-map) {
 
-        #leftSide {
-            flex: 1;
-            min-height: 50%;
-        }
+            flex-direction: column;
 
-        #rightSide {
-            flex: 1;
-            flex-direction: row;
-            width: 100%;
-            max-width: 100%;
-
-            #preview {
+            #leftSide {
                 flex: 1;
-
-                .preview-wrapper {
-                    display: flex;
-                    max-width: 100%;
-                    cursor: pointer;
-                    border-radius: 10px;
-                }
+                min-height: 50%;
             }
 
-            #actions {
-                flex-direction: collumn;
-                margin-left: 8px;
+            #rightSide {
+                //flex: 1;
+                flex-direction: row;
+                width: 100%;
+                max-width: 100%;
+                height: auto;
 
-                button {
-                    border: solid pink 1px;
-                    height: 50%;
+                #preview {
+                    flex: 1;
+
+
+                    .preview-wrapper {
+                        display: flex;
+                        max-width: 100%;
+                        cursor: pointer;
+                        border-radius: 10px;
+                    }
+                }
+
+                #actions {
+                    flex-direction: collumn;
+                    margin-left: 8px;
+
+                    button {
+                        height: 50%;
+                        &#BUTTON_RESULTS {
+                            height: 100%;
+                        }
+                    }
                 }
             }
         }
@@ -162,8 +170,8 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    max-width: 300px;
-
+    //max-width: 300px;
+    gap: 5px;
     // border: solid yellow 5px;
     >div {
         flex: 1;

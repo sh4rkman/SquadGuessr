@@ -5,7 +5,6 @@
 **************************************/
 
 footer {
-    // border: solid green 4px;
     height: 8vh;
     width: 100vw;
     bottom: 0;
@@ -356,4 +355,11 @@ $toastDistanceFromBottom: 40px;
     border: 1px solid #42C0F2;
     color: #42C0F2;
     background: #CFEFFC;
+}
+
+@media (width <=768px) {
+    footer {
+        height: 6vh;
+        font-size: 0.75em;
+    } 
 }

@@ -1,8 +1,12 @@
 main {
     height: 80vh;
     background: rgb(22, 22, 22);
-    max-width: 1400px;
-    margin: 0 auto;
+
+
+    #menu, #map_ui, #results {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
 }
 
 /* Fullscreen overlay */
@@ -23,5 +27,11 @@ main {
         max-width: 90vw;
         max-height: 90vh;
         border-radius: 20px;
+    }
+}
+
+@media (width <=768px) {
+    main {
+        height: 84vh;
     }
 }
