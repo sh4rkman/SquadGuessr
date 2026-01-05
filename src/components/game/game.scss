@@ -73,18 +73,17 @@
             max-width: 400px;
             width: 100%;
 
-            // #preview #hint {
-            //     //max-width: 300px;
-            // }
+            #preview #hint {
+                max-width: 300px;
+            }
 
             #actions #searchMap {
                 display: block;
-                height: 5em;
+                height: 50%;
                 width: 100%;
                 padding: 1em;
                 font-size: 1em;
                 background: #1a1a1a;
-                border: 2px solid #11447e;
                 border-radius: 8px;
                 color: white;
                 font-family: inherit;
@@ -125,7 +124,7 @@
 
             #leftSide {
                 flex: 1;
-                //min-height: 50%;
+                min-height: 50%;
             }
 
             #rightSide {
@@ -137,7 +136,6 @@
 
                 #preview {
                     flex: 1;
-
 
                     .preview-wrapper {
                         display: flex;
@@ -170,7 +168,8 @@
     display: flex;
     flex-direction: column;
     //max-width: 300px;
-    gap: 5px;
+    gap: 8px;
+
     // border: solid yellow 5px;
     >div {
         flex: 1;
@@ -180,7 +179,7 @@
     }
 
     #preview {
-        flex: 3;
+        flex: 1;
 
         .preview-wrapper {
             position: relative;
@@ -242,7 +241,7 @@
     button {
         // padding: 2em 2em;
         width: 100%;
-        height: 5em;
+        height: 100%;
         bottom: 0;
         border-radius: 6px;
 
