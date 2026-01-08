@@ -132,7 +132,7 @@ export default async (env) => {
                       comments: false,
                   },
                   compress: {
-                    pure_funcs: ['console.debug'], // Removes console.debug
+                    //pure_funcs: ['console.debug'], // Removes console.debug
                   },
               },
           }),

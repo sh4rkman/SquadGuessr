@@ -195,7 +195,7 @@ export default class SquadCalc {
             
             return data;
         } catch (error) {
-            console.debug("Error fetching layers data:", error);
+            //console.debug("Error fetching layers data:", error);
             throw error;
         }
     }
@@ -243,21 +243,22 @@ export default class SquadCalc {
             $hint.attr("src", `/api/v2${this.currentGuess.url}`);
 
 
-            // Check if already loaded (cached)
-            if ($hint[0].complete && $hint[0].naturalHeight !== 0) {
-                resolve();
-            } else {
+            // // Check if already loaded (cached)
+            // if ($hint[0].complete && $hint[0].naturalHeight !== 0) {
+            //     resolve();
+            // } else {
 
                 $hint.on("load", () => {
-                    $hint.fadeIn(1200)
-                    resolve();
+                    $hint.fadeIn(1200);
+                     resolve();
                 });
 
-                $hint.on("error", (err) => {
-                    console.error("Failed to load hint image", err);
-                    resolve(); // Resolve anyway to not block the timer
-                });
-            }
+            //     $hint.on("error", (err) => {
+            //         console.error("Failed to load hint image", err);
+            //         resolve(); // Resolve anyway to not block the timer
+            //     });
+            // }
+           
         });
     }
 
@@ -360,7 +361,6 @@ export default class SquadCalc {
         this.BUTTON_NEXT.prop("hidden", true);
         this.BUTTON_GUESS.prop("hidden", true);
         this.BUTTON_RESULTS.prop("hidden", false);
-        console.debug("Game ended");
     }
 
     showResults() {
@@ -434,14 +434,13 @@ export default class SquadCalc {
     }
 
     onTimeAttackEnd() {
-        console.debug("⏰ Time attack finished");
         this.BUTTON_GUESS.trigger("click");
     }
 
     // ===== UI MANAGEMENT =====
 
     switchUI(page) {
-        console.debug("switching UI to", page);
+        //console.debug("switching UI to", page);
         
         const uiStates = {
             menu: {
