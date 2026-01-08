@@ -250,7 +250,7 @@ export default class SquadCalc {
 
                 $hint.on("load", () => {
                     $hint.fadeIn(1200);
-                     resolve();
+                    resolve();
                 });
 
             //     $hint.on("error", (err) => {
