@@ -334,25 +334,43 @@ export default class SquadGuessr {
 
     levenshtein(a, b) {
 
-        function normalize(str) { return str.toLowerCase().trim().replace(/\s+/g, " "); }
-        
+        function normalize(str) {
+            return str.toLowerCase().trim().replace(/\s+/g, " ");
+        }
+
         a = normalize(a);
         b = normalize(b);
 
-        const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
-        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+        // ⬇️ NEW: compact version of user input
+        const compactA = a.replace(/\s/g, "");
 
-        for (let i = 1; i <= b.length; i++) {
-            for (let j = 1; j <= a.length; j++) {
-                matrix[i][j] = Math.min(
-                    matrix[i - 1][j] + 1,
-                    matrix[i][j - 1] + 1,
-                    matrix[i - 1][j - 1] + (b[i - 1] === a[j - 1] ? 0 : 1)
-                );
+        // 1️⃣ Direct compact match
+        if (compactA === b) return 0;
+
+        const words = a.split(" ");
+        let best = Infinity;
+
+        for (const word of words) {
+
+            const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+            for (let j = 0; j <= word.length; j++) matrix[0][j] = j;
+
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= word.length; j++) {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j - 1] + (b[i - 1] === word[j - 1] ? 0 : 1)
+                    );
+                }
             }
+
+            best = Math.min(best, matrix[b.length][word.length]);
         }
-        return matrix[b.length][a.length];
+
+        return best;
     }
+
 
 
     handleNoGuess() {
