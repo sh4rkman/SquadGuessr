@@ -16,7 +16,7 @@
 
 # Submit a new guess
 
-1. **Take your screenshot ingame**, it should be a square and at least 900x900. Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.
+1. **Take your screenshot ingame**, it should be a square and at least 900x900. Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot. Format don't matter as i will convert everything to `.webp` with a script anyway.
 
 2. **Open console** on your browser (F12)
 

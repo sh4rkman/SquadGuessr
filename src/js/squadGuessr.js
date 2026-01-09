@@ -12,7 +12,7 @@ import "./libs/leaflet-measure-path.js";
  * Main class for SquadCalc
  * @classdesc Holds all the main functions
  */
-export default class SquadCalc {
+export default class SquadGuessr {
     constructor(options) {
         this.supportedLanguages = options.supportedLanguages;
         this.MAPSIZE = options.mapSize;
@@ -239,7 +239,8 @@ export default class SquadCalc {
         this.minimap.clear();
         this.minimap.activeMap = map;
         this.minimap.draw(true);
-        console.log(`Map changed to: ${map.name} ✅`);
+        console.debug(`Map changed to: ${map.name} ✅`);
+        console.debug(`Click anywhere on the map to log the latlng`);
     }
 
     setupMap() {

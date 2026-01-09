@@ -1,4 +1,4 @@
-import { ImageOverlay, Map, CRS, SVG, Util, LayerGroup, Popup, LatLngBounds, Browser } from "leaflet";
+import { ImageOverlay, Map, CRS, SVG, Util, LayerGroup, Popup, LatLngBounds, Browser, LatLng } from "leaflet";
 import { App } from "../app.js";
 import { guessMarker } from "./guessMarker.js";
 import "./libs/leaflet-smoothWheelZoom.js";
@@ -210,11 +210,17 @@ export const squadMinimap = Map.extend({
     },
 
 
+    /**
+     * Debug helper to show lat/lng of the clicked aera
+     * @param {LatLng} LatLng
+     */
     logLatLng(latLng) {
+        let map = `"map": "${this.activeMap.name}"`;
         let lat = `"lat": ${latLng.lat * this.mapToGameScale}`;
         let lng = `"lng": ${latLng.lng * this.mapToGameScale}`;
-        console.debug(`${lat}, ${lng}`);
+        console.debug(`{${map}, "mode": "easy", "url": "/img/guesses/CHANGEME.webp", ${lat}, ${lng}},`);
     },
+
     
     /**
      * Right-Click

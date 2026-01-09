@@ -15,7 +15,7 @@ import "./components/game/mapLogo.scss";
 
 
 // JS
-import SquadCalc from "./js/squadCalc.js";
+import SquadGuessr from "./js/squadGuessr.js";
 
 /***************/
 // Start the App
@@ -33,6 +33,6 @@ var options = {
     mapSize: 256,
 };
 
-export var App = new SquadCalc(options);
+export var App = new SquadGuessr(options);
 
 App.init();
