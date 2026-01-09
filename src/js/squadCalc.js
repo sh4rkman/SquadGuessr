@@ -23,6 +23,8 @@ export default class SquadCalc {
         
         // Initialize DOM references
         this.initializeElements();
+
+        window.debugChangeMap = this.debugChangeMap.bind(this);
         
         // Initialize game state
         this.selectedMode = null;
@@ -224,6 +226,20 @@ export default class SquadCalc {
             if (this.selectedTimer > 0) this.startTimeAttackTimer(this.selectedTimer);
         });
 
+    }
+
+    debugChangeMap(mapName) {
+        const map = MAPS.find(m => m.name.toLowerCase() === mapName.toLowerCase());
+        if (!map) {
+            console.error(`Map "${mapName}" not found ❌`);
+            console.log('Available maps:');
+            MAPS.forEach(m => console.log(`  - ${m.name}`));
+            return;
+        }
+        this.minimap.clear();
+        this.minimap.activeMap = map;
+        this.minimap.draw(true);
+        console.log(`Map changed to: ${map.name} ✅`);
     }
 
     setupMap() {

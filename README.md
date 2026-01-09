@@ -16,22 +16,41 @@
 
 # Submit a new guess
 
-1. Take your screenshot ingame, it should be a square and at least 900x900. Using a screenshot tool like greenshot/shareX helps a lot.
+1. **Take your screenshot ingame**, it should be a square and at least 900x900. Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.
 
-2. Open console on your browser (F12)
+2. **Open console** on your browser (F12)
+
+3. Start a new classic game to show the map, then in the console type `debugChangeMap('yourmapname')` to change the map
+
+<div align="center"><img src="./public/img/github/debugCmd.png" alt="squadcalc logo"></div>
+
+</br>
 
 3. Enable "Debug" logging
 
-<img src="./public/img/github/debug.png" alt="squadcalc logo">
+<div align="center"><img src="./public/img/github/debug.png" alt="squadcalc logo"></div>
 
-4. start a new game, hope for your map to appear, click where your screenshot is taken from
 
-<img src="./public/img/github/latlng.png" alt="squadcalc logo">
+</br>
 
-5. Submit your screenshot + latlng on discord : 
+4. Click where your screenshot is taken from
 
-```
-{ "map": "narva", "mode": "easy", "url": "/img/guesses/isyWJP3WFZYqpRD.png", "lat": -1402.4167693765319, "lng": 1438.0344360576973 },
+<div align="center"><img src="./public/img/github/latlng.png" alt="squadcalc logo"></div>
+
+
+</br>
+
+5. Submit your screenshot + latlng on [Discord](https://discord.gg/BNPAc5kEJP) (suggestion channel) : 
+
+
+```json
+{ 
+    "map": "narva",
+    "mode": "easy",
+    "url": "/img/guesses/isyWJP3WFZYqpRD.webp",
+    "lat": -1402.4167693765319,
+    "lng": 1438.0344360576973
+},
 ```
 
 </br></br></br>
