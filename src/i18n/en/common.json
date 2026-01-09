@@ -18,8 +18,11 @@
     "results": {
         "guesses": "Guesses",
         "finalscore": "Final Score",
+        "resultCopied": "Results Copied",
+        "shareItWithYourFriends": "Share it with your friends on Discord!",
         "buttons": {
             "playagain": "PLAY AGAIN",
+            "menu": "MENU",
             "share": "SHARE"
         }
     },

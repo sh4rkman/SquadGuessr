@@ -20,12 +20,12 @@ export default class SquadGuessr {
         this.activeWeapon = "";
         this.hasMouse = matchMedia("(pointer:fine)").matches;
         this.version = packageInfo.version;
-        
+
         // Initialize DOM references
         this.initializeElements();
 
         window.debugChangeMap = this.debugChangeMap.bind(this);
-        
+
         // Initialize game state
         this.selectedMode = null;
         this.score = 0;
@@ -42,6 +42,8 @@ export default class SquadGuessr {
         this.BUTTON_NEWGAME = $("#BUTTON_PLAY");
         this.BUTTON_RESULTS = $("#BUTTON_RESULTS");
         this.BUTTON_PLAYAGAIN = $("#BUTTON_PLAYAGAIN");
+        this.BUTTON_MENU = $("#BUTTON_MENU");
+        this.BUTTON_SHARE = $("#BUTTON_SHARE");
         this.MAIN_LOGO = $("#MAINLOGO");
         this.INPUT_GUESS = $("#searchMap");
     }
@@ -88,14 +90,33 @@ export default class SquadGuessr {
         this.BUTTON_GUESS.on("click", () => this.handleGuess());
         this.BUTTON_NEXT.on("click", () => this.loadNextGuess());
         this.BUTTON_RESULTS.on("click", () => this.showResults());
+
     }
 
     setupNavigationButtons() {
-        this.BUTTON_PLAYAGAIN.on("click", () => this.switchUI("menu"));
+        this.BUTTON_MENU.on("click", () => this.switchUI("menu"));
+        this.BUTTON_PLAYAGAIN.on("click", () => this.startNewGame());
+        this.BUTTON_SHARE.on("click", () => this.copyResults());
         this.MAIN_LOGO.on("click", () => {
             this.stopTimer();
             this.switchUI("menu");
         });
+    }
+
+    copyResults() {
+        let text = `\u200B\n\u200B\n🏆 I just scored **${this.score} points** in SquadGuessr! 🏆\n`;
+
+        this.gameData.forEach((guess, index) => { text += `  🔸*Guess#${index + 1}: ${guess.points} points*\n`; });
+        text = text + '\nThink you can beat me? Try now: https://squadguessr.app 🗺️';
+
+        navigator.clipboard.writeText(text).then(() => {
+            let title = i18next.t("common:results.resultCopied");
+            let subtext = i18next.t("common:results.shareItWithYourFriends");
+            this.openToast("success", title, subtext);
+        }).catch(err => {
+            console.error('Copy failed', err);
+        });
+
     }
 
 
@@ -127,7 +148,7 @@ export default class SquadGuessr {
             const hasText = this.INPUT_GUESS.val().trim() !== "";
             this.BUTTON_GUESS.prop("disabled", !hasText);
         });
-        
+
         // Handle Enter key to submit
         this.INPUT_GUESS.on("keypress", (e) => {
             if (e.key === "Enter" && !this.BUTTON_GUESS.prop("disabled")) {
@@ -137,14 +158,14 @@ export default class SquadGuessr {
     }
 
     // ===== GAME FLOW =====
-
-    startNewGame() {
+    startNewGame(ROUND_NUMBER = 5) {
         this.setButtonLoading(this.BUTTON_NEWGAME, true);
-        const ROUND_NUMBER = 5;
+        this.setButtonLoading(this.BUTTON_PLAYAGAIN, true);
 
         this.getGuess(ROUND_NUMBER)
             .catch(error => {
                 this.setButtonLoading(this.BUTTON_NEWGAME, false);
+                this.setButtonLoading(this.BUTTON_PLAYAGAIN, false);
                 if (error.name !== "AbortError") throw error;
             })
             .then(response => {
@@ -155,6 +176,7 @@ export default class SquadGuessr {
             })
             .finally(() => {
                 this.setButtonLoading(this.BUTTON_NEWGAME, false);
+                this.setButtonLoading(this.BUTTON_PLAYAGAIN, false);
             });
     }
 
@@ -165,7 +187,7 @@ export default class SquadGuessr {
 
         $("#totalPoints").html(0);
         this.INPUT_GUESS.val("");
-        
+
         this.BUTTON_NEXT.prop("hidden", false);
         this.BUTTON_GUESS.prop("hidden", false);
         this.BUTTON_RESULTS.prop("hidden", true);
@@ -181,20 +203,20 @@ export default class SquadGuessr {
     async getGuess(number) {
         const url = `/api/v2/get/squadGuess?nb=${number}`;
         try {
-            const response = await fetch(url, { 
-                headers: { "X-App-Version": this.version } 
+            const response = await fetch(url, {
+                headers: { "X-App-Version": this.version }
             });
-            
-            if (!response.ok) { 
-                throw new Error("Network response was not ok"); 
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
             }
-            
+
             const result = await response.json();
-            
+
             // Decode the base64 data
             const decodedString = atob(result.data);
             const data = JSON.parse(decodedString);
-            
+
             return data;
         } catch (error) {
             //console.debug("Error fetching layers data:", error);
@@ -251,7 +273,7 @@ export default class SquadGuessr {
     }
 
     setupHint() {
-        
+
         return new Promise((resolve) => {
             const $hint = $("#hint");
             $hint.off("load error");
@@ -265,17 +287,17 @@ export default class SquadGuessr {
             //     resolve();
             // } else {
 
-                $hint.on("load", () => {
-                    $hint.fadeIn(1200);
-                    resolve();
-                });
+            $hint.on("load", () => {
+                $hint.fadeIn(1200);
+                resolve();
+            });
 
             //     $hint.on("error", (err) => {
             //         console.error("Failed to load hint image", err);
             //         resolve(); // Resolve anyway to not block the timer
             //     });
             // }
-           
+
         });
     }
 
@@ -290,7 +312,7 @@ export default class SquadGuessr {
 
     handleGuess() {
         if (!this.currentGuess) return;
-        
+
         this.stopTimer();
 
         if (this.selectedMode === "mapFinder") {
@@ -305,11 +327,11 @@ export default class SquadGuessr {
         this.checkGameEnd();
     }
 
-    handleMapGuess(){
+    handleMapGuess() {
         let points = 0;
         let icon = "❌";
 
-        if (this.levenshtein(this.INPUT_GUESS.val(), this.currentGuess.map) <= 2 ) {
+        if (this.levenshtein(this.INPUT_GUESS.val(), this.currentGuess.map) <= 2) {
             points = 100;
             icon = "✅";
         }
@@ -334,7 +356,7 @@ export default class SquadGuessr {
 
     levenshtein(a, b) {
 
-        function normalize(str) { return str.toLowerCase().trim().replace(/\s+/g, " ");}
+        function normalize(str) { return str.toLowerCase().trim().replace(/\s+/g, " "); }
 
         a = normalize(a);
         b = normalize(b);
@@ -431,7 +453,7 @@ export default class SquadGuessr {
     startTimeAttackTimer(duration) {
         let remaining = duration;
         $("#timerWrapper").prop("hidden", false);
-        
+
         if (this.timerInterval) clearInterval(this.timerInterval);
 
         this.updateTimerDisplay(remaining);
@@ -467,11 +489,11 @@ export default class SquadGuessr {
 
     switchUI(page) {
         //console.debug("switching UI to", page);
-        
+
         const uiStates = {
             menu: {
                 show: ["#menu", "#footerLogos"],
-                hide: ["#map_ui", "#results"],
+                hide: ["#map_ui", "#results", "#timerWraper"],
                 scoreHidden: true
             },
             game: {
@@ -488,7 +510,7 @@ export default class SquadGuessr {
 
         const state = uiStates[page];
         if (!state) return;
-        
+
         state.show.forEach(selector => $(selector).fadeIn(400));
         state.hide.forEach(selector => $(selector).hide());
         $("#score").prop("hidden", state.scoreHidden);
@@ -520,19 +542,19 @@ export default class SquadGuessr {
     loadTopScores() {
         const modes = ["classic", "timeAttack", "mapFinder"];
         this.topScores = {};
-        modes.forEach(mode => { this.topScores[mode] = this.getStoredScore(mode);});
+        modes.forEach(mode => { this.topScores[mode] = this.getStoredScore(mode); });
         this.updateScoreDisplay();
     }
 
     getStoredScore(mode) {
         const key = `topScore_${mode}`;
         let value = localStorage.getItem(key);
-        
+
         if (value === null) {
             localStorage.setItem(key, "0");
             return 0;
         }
-        
+
         return Number(value);
     }
 
@@ -541,7 +563,7 @@ export default class SquadGuessr {
         $("#timeAttackScore").html(this.topScores.timeAttack);
         $("#mapFinderScore").html(this.topScores.mapFinder);
         $("#mapFinderScore").html(this.topScores.timedMapFinderScore);
-        
+
     }
 
     saveTopScore(mode, score) {
@@ -624,37 +646,37 @@ export default class SquadGuessr {
             this.minimap.guessMarker.getLatLng().lat * this.minimap.mapToGameScale,
             this.minimap.guessMarker.getLatLng().lng * this.minimap.mapToGameScale
         ];
-        
+
         const dx = solutionLatLng[1] - guessLatLng[1];
         const dy = solutionLatLng[0] - guessLatLng[0];
-        
+
         return Math.sqrt(dx * dx + dy * dy);
     }
 
 
     getPoints(distance) {
-    // base thresholds for a 3000x3000 map
+        // base thresholds for a 3000x3000 map
         const baseSteps = [
             { maxDistance: 20, points: 100, icon: "! 💯" },
-            { maxDistance: 50, points: 80, icon: "! 🌟"  },
-            { maxDistance: 100, points: 60, icon: "👏🏼"  },
+            { maxDistance: 50, points: 80, icon: "! 🌟" },
+            { maxDistance: 100, points: 60, icon: "👏🏼" },
             { maxDistance: 200, points: 40, icon: "👍🏼" },
             { maxDistance: 300, points: 20, icon: "😐" },
             { maxDistance: 500, points: 10, icon: ".. 🤨" },
         ];
         const mapSize = this.minimap.activeMap.size;
         const scale = mapSize / 3000; // 1 for base map, >1 for bigger maps, <1 for smaller
-    
+
         // scale thresholds
         const steps = baseSteps.map(s => ({
             maxDistance: s.maxDistance * scale,
             points: s.points,
             icon: s.icon
         }));
-    
+
         let points;
         let icon = ""; // Add this to track the icon
-    
+
         if (distance <= steps[0].maxDistance) {
             points = steps[0].points;
             icon = steps[0].icon;
@@ -666,7 +688,7 @@ export default class SquadGuessr {
             // Find the appropriate icon based on distance
             icon = steps.find(s => distance <= s.maxDistance)?.icon || "";
         }
-    
+
         this.gameData[this.gamePhase - 1].points = points;
         $("#mapName").html(`${points} ${i18next.t("shared.points", { ns: "common" })} ${icon}`).fadeIn();
         return points;
@@ -678,11 +700,11 @@ export default class SquadGuessr {
             if (distance <= steps[i].maxDistance) {
                 const prevStep = steps[i - 1];
                 const currStep = steps[i];
-                
+
                 const distanceRange = currStep.maxDistance - prevStep.maxDistance;
                 const pointsRange = currStep.points - prevStep.points;
                 const distanceIntoRange = distance - prevStep.maxDistance;
-                
+
                 return Math.round(prevStep.points + (pointsRange * distanceIntoRange / distanceRange));
             }
         }
@@ -768,31 +790,29 @@ export default class SquadGuessr {
             document.querySelector("#timer")?.classList.remove("timer-animation");
             clearTimeout(countdown);
         };
-        
+
         this.openToast = (type, title, text) => {
             const toast = document.querySelector("#toast");
             clearTimeout(countdown);
-        
+
             const timer = document.querySelector("#timer");
             timer?.classList.remove("timer-animation");
             void timer?.offsetWidth; // Trigger reflow
             timer?.classList.add("timer-animation");
-        
+
             toast.classList = [type];
             toast.style.animation = "open 0.3s cubic-bezier(.47,.02,.44,2) forwards";
-        
-            toast.querySelector("h4")?.setAttribute("data-i18n", `tooltips:${title}`);
-            toast.querySelector("h4").innerHTML = i18next.t(`tooltips:${title}`);
-            toast.querySelector("p")?.setAttribute("data-i18n", `tooltips:${text}`);
-            toast.querySelector("p").innerHTML = i18next.t(`tooltips:${text}`);
-        
+
+            toast.querySelector("h4").innerHTML = title;
+            toast.querySelector("p").innerHTML = text;
+
             countdown = setTimeout(closeToast, 5000);
         };
 
         document.querySelector("#toast")?.addEventListener("click", (event) => {
             const toast = document.querySelector("#toast");
             const title = toast.querySelector("h4")?.getAttribute("data-i18n");
-            
+
             closeToast();
 
             if (title === "tooltips:sessionCreated" && event.target.tagName !== "BUTTON") {
@@ -802,8 +822,7 @@ export default class SquadGuessr {
     }
 
     setupUIControls() {
-        $("#fabCheckbox2").on("change", () => this.switchUI("menu"));
-        
+        //$("#fabCheckbox2").on("change", () => this.switchUI("menu"));
         this.setupControlButtons("#canvasControls", ".sim");
         this.setupControlButtons("#settingsControls", ".panel");
     }
@@ -812,7 +831,7 @@ export default class SquadGuessr {
         $(`${controlSelector} button`).on("click", (event) => {
             const $button = $(event.currentTarget);
             if ($button.hasClass("active")) return;
-            
+
             $(`${controlSelector} > .active`).first().removeClass("active");
             $button.addClass("active");
             $(`${targetSelector}.active`).removeClass("active");
@@ -830,12 +849,12 @@ export default class SquadGuessr {
     }
 
     closeDialogOnClickOutside(dialog) {
-        dialog?.addEventListener("click", function(event) {
+        dialog?.addEventListener("click", function (event) {
             const RECT = dialog.getBoundingClientRect();
             const isInDialog = (
-                RECT.top <= event.clientY && 
+                RECT.top <= event.clientY &&
                 event.clientY <= RECT.top + RECT.height &&
-                RECT.left <= event.clientX && 
+                RECT.left <= event.clientX &&
                 event.clientX <= RECT.left + RECT.width
             );
             if (!isInDialog) {
@@ -856,11 +875,11 @@ export default class SquadGuessr {
     //             urlParams.delete(key);
     //         }
     //     }
-       
+
     //     // Sort parameters
     //     const sortedParams = new URLSearchParams();
     //     const paramOrder = ["map", "layer", "type", "session"];
-        
+
     //     paramOrder.forEach((param) => {
     //         if (urlParams.has(param)) {
     //             sortedParams.set(param, urlParams.get(param));
