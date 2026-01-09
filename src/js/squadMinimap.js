@@ -1,4 +1,4 @@
-import { ImageOverlay, Map, CRS, SVG, Util, LayerGroup, Popup, LatLngBounds, Browser, LatLng } from "leaflet";
+import { ImageOverlay, Map, CRS, SVG, Util, LayerGroup, Popup, LatLngBounds, Browser } from "leaflet";
 import { App } from "../app.js";
 import { guessMarker } from "./guessMarker.js";
 import "./libs/leaflet-smoothWheelZoom.js";

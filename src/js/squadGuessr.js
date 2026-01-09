@@ -37,12 +37,14 @@ export default class SquadGuessr {
     }
 
     initializeElements() {
+        this.BUTTON_TIMER = $("#BUTTON_TIMER");
         this.BUTTON_NEXT = $("#BUTTON_NEXT");
         this.BUTTON_GUESS = $("#BUTTON_GUESS");
         this.BUTTON_NEWGAME = $("#BUTTON_PLAY");
         this.BUTTON_RESULTS = $("#BUTTON_RESULTS");
         this.BUTTON_PLAYAGAIN = $("#BUTTON_PLAYAGAIN");
         this.BUTTON_MENU = $("#BUTTON_MENU");
+        this.BUTTON_BACK = $("#BUTTON_BACK");
         this.BUTTON_SHARE = $("#BUTTON_SHARE");
         this.MAIN_LOGO = $("#MAINLOGO");
         this.INPUT_GUESS = $("#searchMap");
@@ -64,28 +66,71 @@ export default class SquadGuessr {
         this.loadMinimap();
         this.loadUI();
         //updateContent();
-        this.selectMode("classic", 60);
+        this.selectMode("classic");
+        this.selectTimer("0");
     }
 
     setupEventListeners() {
         this.setupModeSelection();
+        this.setupTimerSelection();
         this.setupGameButtons();
         this.setupNavigationButtons();
         this.setupImageOverlay();
         this.setupGuessInput();
+        this.setupShortkeys();
+    }
+
+
+    setupShortkeys(){
+        document.addEventListener("keydown", (e) => {
+            // Only react to Space
+            if (e.code !== "Space") return;
+
+            // Ignore when typing in inputs / textareas / contenteditable
+            const tag = e.target.tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+
+            e.preventDefault();
+
+            if (this.BUTTON_GUESS.is(":visible") && !this.BUTTON_GUESS.prop("disabled")) {
+                this.BUTTON_GUESS.trigger("click");
+                return;
+            }
+
+            if (this.BUTTON_NEXT.is(":visible") && !this.BUTTON_NEXT.prop("disabled")) {
+                this.BUTTON_NEXT.trigger("click");
+                return;
+            }
+
+            if (this.BUTTON_RESULTS.is(":visible") && !this.BUTTON_RESULTS.prop("disabled")) {
+                this.BUTTON_RESULTS.trigger("click");
+                return;
+            }
+            
+        });
+    
     }
 
     setupModeSelection() {
         document.querySelectorAll(".mode-card").forEach(card => {
             card.addEventListener("click", () => {
                 const mode = card.getAttribute("data-mode");
+                this.selectMode(mode);
+            });
+        });
+    }
+
+    setupTimerSelection() {
+        document.querySelectorAll(".timer-card").forEach(card => {
+            card.addEventListener("click", () => {
                 const timer = card.getAttribute("data-timer");
-                this.selectMode(mode, timer);
+                this.selectTimer(timer);
             });
         });
     }
 
     setupGameButtons() {
+
         this.BUTTON_NEWGAME.on("click", () => this.startNewGame());
         this.BUTTON_GUESS.on("click", () => this.handleGuess());
         this.BUTTON_NEXT.on("click", () => this.loadNextGuess());
@@ -94,7 +139,9 @@ export default class SquadGuessr {
     }
 
     setupNavigationButtons() {
-        this.BUTTON_MENU.on("click", () => this.switchUI("menu"));
+        this.BUTTON_TIMER.on("click", () => { this.switchUI("timer"); });
+        this.BUTTON_MENU.on("click", () => { this.switchUI("menu"); });
+        this.BUTTON_BACK.on("click", () => { this.switchUI("menu"); });
         this.BUTTON_PLAYAGAIN.on("click", () => this.startNewGame());
         this.BUTTON_SHARE.on("click", () => this.copyResults());
         this.MAIN_LOGO.on("click", () => {
@@ -103,18 +150,19 @@ export default class SquadGuessr {
         });
     }
 
+
     copyResults() {
         let text = `\u200B\n\u200B\n🏆 I just scored **${this.score} points** in SquadGuessr! 🏆\n`;
 
         this.gameData.forEach((guess, index) => { text += `  🔸*Guess#${index + 1}: ${guess.points} points*\n`; });
-        text = text + '\nThink you can beat me? Try now: https://squadguessr.app 🗺️';
+        text = text + "\nThink you can beat me? Try now: https://squadguessr.app 🗺️";
 
         navigator.clipboard.writeText(text).then(() => {
             let title = i18next.t("common:results.resultCopied");
             let subtext = i18next.t("common:results.shareItWithYourFriends");
             this.openToast("success", title, subtext);
         }).catch(err => {
-            console.error('Copy failed', err);
+            console.error("Copy failed", err);
         });
 
     }
@@ -219,11 +267,12 @@ export default class SquadGuessr {
 
             return data;
         } catch (error) {
-            //console.debug("Error fetching layers data:", error);
+            console.debug("Error fetching guesses data, is API down ?");
             throw error;
         }
     }
 
+    
     loadNextGuess() {
         $("#text").css("visibility", "hidden");
 
@@ -253,8 +302,8 @@ export default class SquadGuessr {
     debugChangeMap(mapName) {
         const map = MAPS.find(m => m.name.toLowerCase() === mapName.toLowerCase());
         if (!map) {
-            console.error(`Map "${mapName}" not found ❌`);
-            console.log('Available maps:');
+            console.debug(`Map "${mapName}" not found ❌`);
+            console.debug("Available maps:");
             MAPS.forEach(m => console.log(`  - ${m.name}`));
             return;
         }
@@ -262,7 +311,7 @@ export default class SquadGuessr {
         this.minimap.activeMap = map;
         this.minimap.draw(true);
         console.debug(`Map changed to: ${map.name} ✅`);
-        console.debug(`Click anywhere on the map to log the latlng`);
+        console.debug("Click anywhere on the map to log the latlng");
     }
 
     setupMap() {
@@ -488,22 +537,27 @@ export default class SquadGuessr {
     // ===== UI MANAGEMENT =====
 
     switchUI(page) {
-        //console.debug("switching UI to", page);
-
+        console.debug("switching UI to", page);
+        // TODO add timerWrapper into "scorehidden" just to be sure
         const uiStates = {
             menu: {
                 show: ["#menu", "#footerLogos"],
-                hide: ["#map_ui", "#results", "#timerWraper"],
+                hide: ["#map_ui", "#timer_ui", "#results", "#timerWraper"],
+                scoreHidden: true
+            },
+            timer: {
+                show: ["#timer_ui", "#footerLogos"],
+                hide: ["#menu", "#map_ui", "#results", "#timerWraper"],
                 scoreHidden: true
             },
             game: {
                 show: ["#map_ui"],
-                hide: ["#menu", "#results", "#footerLogos"],
+                hide: ["#menu", "#timer_ui", "#results", "#footerLogos"],
                 scoreHidden: false
             },
             results: {
                 show: ["#results", "#footerLogos"],
-                hide: ["#map_ui", "#menu"],
+                hide: ["#map_ui", "#timer_ui", "#menu", "#timerWraper"],
                 scoreHidden: true
             }
         };
@@ -515,14 +569,22 @@ export default class SquadGuessr {
         state.hide.forEach(selector => $(selector).hide());
         $("#score").prop("hidden", state.scoreHidden);
         $("#mapName").hide();
+        this.stopTimer();
     }
 
-    selectMode(mode, timer = 0) {
+    selectMode(mode) {
         document.querySelectorAll(".mode-card").forEach(card => {
             card.classList.remove("selected");
         });
         document.querySelector(`[data-mode="${mode}"]`)?.classList.add("selected");
         this.selectedMode = mode;
+    }
+
+    selectTimer(timer = 0) {
+        document.querySelectorAll(".timer-card").forEach(card => {
+            card.classList.remove("selected");
+        });
+        document.querySelector(`[data-timer="${timer}"]`)?.classList.add("selected");
         this.selectedTimer = timer;
     }
 
@@ -530,7 +592,7 @@ export default class SquadGuessr {
         if (isLoading) {
             button.data("original-text", button.html());
             button.prop("disabled", true);
-            button.html(`<span class="spinner"></span> ${i18next.t("menu.buttons.loading", { ns: "common" })}...`);
+            button.html(`<span class="spinner"></span> ${i18next.t("timer.buttons.loading", { ns: "common" })}...`);
         } else {
             button.prop("disabled", false);
             button.html(button.data("original-text") || button.html());

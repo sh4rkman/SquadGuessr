@@ -1,6 +1,12 @@
 {
     "menu": {
         "buttons": {
+            "next": "NEXT"
+        }
+    },
+    "timer": {
+        "buttons": {
+            "back": "BACK",
             "play": "PLAY",
             "loading": "LOADING"
         }
@@ -8,7 +14,7 @@
     "game": {
         "km": "km",
         "m": "m",
-        "guessPlaceHolder": "Enter your guess...",
+        "guessPlaceHolder": "What map is that..",
         "buttons": {
             "guess": "GUESS",
             "next": "NEXT",

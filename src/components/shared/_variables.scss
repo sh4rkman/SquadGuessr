@@ -82,12 +82,14 @@ button {
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-size: 1.6em;
+    padding: 18px 38px;
 
     &:hover {
         background: $mainColorLight;
     }
 
-    &:active {
+    &:not(:disabled):active {
         transform: translateY(-2px);
         transform: scale(0.9);
         background-color: rgba(73, 73, 73, 0.842);
@@ -181,4 +183,14 @@ button:focus {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+}
+
+@media (width <=600px) {
+
+    h1 {
+        font-size: 1.5em;
+    }
+    button {
+        font-size: 1em;
+    }
 }

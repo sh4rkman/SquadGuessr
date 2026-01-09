@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import "./components/index.scss";
 import "./components/header/header.scss";
 import "./components/menu/menu.scss";
+import "./components/timer/timer.scss";
 import "./components/game/game.scss";
 import "./components/results/results.scss";
 import "./components/footer/footer.scss";

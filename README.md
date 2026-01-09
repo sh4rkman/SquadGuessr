@@ -14,40 +14,41 @@
 </br>
 </br>
 
-# Submit a new guess
+# Submit a new guess 
 
-1. **Take your screenshot ingame**, it should be a square and at least 900x900. Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot. Format don't matter as i will convert everything to `.webp` with a script anyway.
+</br>
 
-2. **Open console** on your browser (F12)
+1. Take your screenshot ingame, it should be a square and **at least 900px*900px**.  
+Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.  
+Format don't matter as i will convert everything to `.webp` with a script anyway.
 
-3. Start a new classic game to show the map, then in the console type `debugChangeMap('yourmapname')` to change the map
+2. Open console on your browser (F12)
+
+3. Enable "Debug" logging
+
+<div align="center"><img src="./public/img/github/debug.png" alt="squadcalc logo"></div></br>
+
+4. Start a new classic game to show the map, then in the console type `debugChangeMap('yourmapname')` to change the map to your taste
 
 <div align="center"><img src="./public/img/github/debugCmd.png" alt="squadcalc logo"></div>
 
 </br>
 
-3. Enable "Debug" logging
-
-<div align="center"><img src="./public/img/github/debug.png" alt="squadcalc logo"></div>
-
-
-</br>
-
-4. Click where your screenshot is taken from
+5. Click where your screenshot is taken from
 
 <div align="center"><img src="./public/img/github/latlng.png" alt="squadcalc logo"></div>
 
 
 </br>
 
-5. Submit your screenshot + latlng on [Discord](https://discord.gg/BNPAc5kEJP) (suggestion channel) : 
+6. Submit your screenshot + latlng on [Discord](https://discord.gg/BNPAc5kEJP) (suggestion channel), e.g. : 
 
 
 ```json
 { 
     "map": "narva",
     "mode": "easy",
-    "url": "/img/guesses/isyWJP3WFZYqpRD.webp",
+    "url": "/img/guesses/yourimagename.webp",
     "lat": -1402.4167693765319,
     "lng": 1438.0344360576973
 },
