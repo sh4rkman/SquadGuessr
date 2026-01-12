@@ -542,12 +542,12 @@ export default class SquadGuessr {
         const uiStates = {
             menu: {
                 show: ["#menu", "#footerLogos"],
-                hide: ["#map_ui", "#timer_ui", "#results", "#timerWraper"],
+                hide: ["#map_ui", "#timer_ui", "#results"],
                 scoreHidden: true
             },
             timer: {
                 show: ["#timer_ui", "#footerLogos"],
-                hide: ["#menu", "#map_ui", "#results", "#timerWraper"],
+                hide: ["#menu", "#map_ui", "#results"],
                 scoreHidden: true
             },
             game: {
@@ -557,7 +557,7 @@ export default class SquadGuessr {
             },
             results: {
                 show: ["#results", "#footerLogos"],
-                hide: ["#map_ui", "#timer_ui", "#menu", "#timerWraper"],
+                hide: ["#map_ui", "#timer_ui", "#menu"],
                 scoreHidden: true
             }
         };

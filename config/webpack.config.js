@@ -16,15 +16,15 @@ const __dirname = dirname(__filename);
 
 export default async (env) => {
 
-  // Dynamically import dotenv and await it since it's a Promise
-  const { config } = await import('dotenv');
-  config();
+    // Dynamically import dotenv and await it since it's a Promise
+    const { config } = await import('dotenv');
+    const dotenv = config();
+    const DEV_SERVER_AUTO_OPEN = (process.env.DEV_SERVER_AUTO_OPEN || "true").toLowerCase() === "true";
+    const SEARCH_ENGINES = (process.env.SEARCH_ENGINES || "false").toLowerCase() === "true";
+    
 
-  // If you want webpack to add a robot.txt indexing, create a .env file with INDEX=TRUE
-  const isIndexed = process.env.INDEX && process.env.INDEX.toLowerCase() === 'true';
-  const robotstxtPolicy = isIndexed 
-    ? [{ userAgent: "*", allow: "/" }] 
-    : [{ userAgent: "*", disallow: "/" }];
+    // Run checks on .env file
+    preChecks(dotenv, env, DEV_SERVER_AUTO_OPEN, SEARCH_ENGINES);
 
   return {
 
@@ -58,8 +58,8 @@ export default async (env) => {
         ],
     },
     devServer: {
-      port: process.env.DEV_PORT || 3000,
-      open: true,
+      port: process.env.DEV_SERVER_PORT || 3000,
+      open: DEV_SERVER_AUTO_OPEN,
       historyApiFallback: {
         disableDotRule: true,
       },
@@ -102,7 +102,7 @@ export default async (env) => {
             $: "jquery", jQuery: "jquery", "window.jQuery": "jquery'", "window.$": "jquery"
         }),
         new RobotstxtPlugin({
-          policy: robotstxtPolicy,
+          policy: SEARCH_ENGINES ? [{ userAgent: "*", allow: "/" }] : [{ userAgent: "*", disallow: "/" }],
         }),
     ],
     performance: {
@@ -140,3 +140,43 @@ export default async (env) => {
     },
   }
 };
+
+
+function preChecks(dotenv, env, DEV_SERVER_AUTO_OPEN, SEARCH_ENGINES) {
+
+    console.log("\n\n*******************************************************************")
+    console.log(`   _____                       _  _____                          `)
+    console.log(`  / ____|                     | |/ ____|                         `) 
+    console.log(` | (___   __ _ _   _  __ _  __| | |  __ _   _  ___  ___ ___ _ __ `) 
+    console.log(`  \\___ \\ / _\` | | | |/ _\` |/ _\` | | |_ | | | |/ _ \/ __/ __| '__|`) 
+    console.log(`  ____) | (_| | |_| | (_| | (_| | |__| | |_| |  __/\\__ \\__ \\ |   `) 
+    console.log(` |_____/ \\__, |\\__,_|\\__,_|\\__,_|\\_____|\\__,_|\\___||___/___/_|   `) 
+    console.log(`            | |                                                  `) 
+    console.log(`            |_|                                                  `) 
+    console.log(`                            https://github.com/sh4rkman/SquadGuessr`)       
+    console.log("*******************************************************************\n")
+
+    if (dotenv.error) {
+        console.error("    -> NO .ENV CONFIGURATION FOUND IN ROOT FOLDER ❌")
+        console.error("    -> see https://github.com/sh4rkman/SquadCalc/wiki/Installation-&-Configuration#optional-configuration\n\n");
+        process.exit(1);
+    }
+
+    console.log(`    -> Found .env file ✅ !`)
+    console.log(`      -> Index on search engines : ${SEARCH_ENGINES ? '✅' : '❌'}`)
+    if (!env.WEBPACK_BUILD) console.log(`      -> URL will be http://localhost:${process.env.DEV_SERVER_PORT || 3000} ✅`)
+    if (process.env.DEV_API_URL) {
+        if (process.env.DEV_API_URL.endsWith("/")) {
+            console.error("      -> API_URL should NOT end with a slash (/) ❌\n\n");
+            process.exit(1);
+        }
+        console.log(`      -> API used : ${process.env.DEV_API_URL} ✅`);
+    }
+    else {
+        console.error("      -> NO API URL FOUND IN .ENV ❌");
+        console.error("      -> Check if a .env file exists and if API_URL is defined\n\n");
+        process.exit(1);
+    }
+    if (!env.WEBPACK_BUILD) console.log(`      -> Should dev server open in a new Tab ? ${DEV_SERVER_AUTO_OPEN ? "✅" : "❌"}`);
+    console.log(`    -> ${env.WEBPACK_BUILD ? 'Building /dist/ folder...\n' : 'Launching dev server...\n'}`)
+}
