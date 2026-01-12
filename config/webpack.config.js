@@ -165,18 +165,18 @@ function preChecks(dotenv, env, DEV_SERVER_AUTO_OPEN, SEARCH_ENGINES) {
     console.log(`    -> Found .env file ✅ !`)
     console.log(`      -> Index on search engines : ${SEARCH_ENGINES ? '✅' : '❌'}`)
     if (!env.WEBPACK_BUILD) console.log(`      -> URL will be http://localhost:${process.env.DEV_SERVER_PORT || 3000} ✅`)
-    if (process.env.DEV_API_URL) {
-        if (process.env.DEV_API_URL.endsWith("/")) {
-            console.error("      -> API_URL should NOT end with a slash (/) ❌\n\n");
-            process.exit(1);
-        }
-        console.log(`      -> API used : ${process.env.DEV_API_URL} ✅`);
-    }
-    else {
-        console.error("      -> NO API URL FOUND IN .ENV ❌");
-        console.error("      -> Check if a .env file exists and if API_URL is defined\n\n");
-        process.exit(1);
-    }
+    // if (process.env.DEV_API_URL) {
+    //     if (process.env.DEV_API_URL.endsWith("/")) {
+    //         console.error("      -> API_URL should NOT end with a slash (/) ❌\n\n");
+    //         process.exit(1);
+    //     }
+    //     console.log(`      -> API used : ${process.env.DEV_API_URL} ✅`);
+    // }
+    // else {
+    //     console.error("      -> NO API URL FOUND IN .ENV ❌");
+    //     console.error("      -> Check if a .env file exists and if API_URL is defined\n\n");
+    //     process.exit(1);
+    // }
     if (!env.WEBPACK_BUILD) console.log(`      -> Should dev server open in a new Tab ? ${DEV_SERVER_AUTO_OPEN ? "✅" : "❌"}`);
     console.log(`    -> ${env.WEBPACK_BUILD ? 'Building /dist/ folder...\n' : 'Launching dev server...\n'}`)
 }
