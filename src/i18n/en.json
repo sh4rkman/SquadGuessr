@@ -1,10 +1,21 @@
 {
     "menu": {
+        "gameMode": "Game Mode",
+        "classic": "Classic",
+        "findMap": "Find the Map",
+        "topScore": "Top Score: ",
         "buttons": {
             "next": "NEXT"
         }
     },
     "timer": {
+        "timer": "Timer",
+        "chill": "Chill",
+        "timed": "Timed",
+        "rush": "Rush",
+        "takeYourTime": "Take your time",
+        "oneMinutePerGuess": "1mn per guess",
+        "fifteenSecondsPerGuess": "15s per guess",
         "buttons": {
             "back": "BACK",
             "play": "PLAY",
@@ -14,6 +25,7 @@
     "game": {
         "km": "km",
         "m": "m",
+        "s": "s",
         "guessPlaceHolder": "What map is that..",
         "buttons": {
             "guess": "GUESS",

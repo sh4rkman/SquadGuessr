@@ -1,12 +1,30 @@
 import i18next from "i18next";
 //import { App } from "../app.js";
-import enCommon from "./en/common.json";
+import enCommon from "./en.json";
+import zhCommon from "./zh.json";
 
 /**
  * Update every label with the correct localization text
  */
 export function loadLanguage(LANGUAGES) {
-    //const LANG_SELECTOR = $(".dropbtn4");
+    const LANG_SELECTOR = $(".dropbtn4");
+
+    LANG_SELECTOR.select2({
+        dropdownCssClass: "dropbtn4",
+        width: "80px",
+        minimumResultsForSearch: -1,
+    });
+
+    LANGUAGES.forEach(function(lng) {
+        LANG_SELECTOR.append(`<option value=${lng[0]}>${lng[1]}</option>`);
+    });
+
+    $(document).on("change", ".dropbtn4", function() {
+        i18next.changeLanguage(this.value, updateContent);
+        localStorage.setItem("settings-language", this.value);
+        $("html").attr("lang", this.value);
+    });
+
 
     i18next.init({
         fallbackLng: "en",
@@ -16,6 +34,9 @@ export function loadLanguage(LANGUAGES) {
         resources: {
             en: {
                 common: enCommon
+            },
+            zh: {
+                common: zhCommon
             }
         }
     }, function(err) {
@@ -23,22 +44,6 @@ export function loadLanguage(LANGUAGES) {
         getLanguage(LANGUAGES);
     });
 
-
-    // LANG_SELECTOR.select2({
-    //     dropdownCssClass: "dropbtn4",
-    //     dropdownParent: $("#helpDialog"),
-    //     minimumResultsForSearch: -1,
-    // });
-
-    // LANGUAGES.forEach(function(lng) {
-    //     LANG_SELECTOR.append(`<option value=${lng[0]}>${lng[1]}</option>`);
-    // });
-
-    // $(document).on("change", ".dropbtn4", function() { 
-    //     i18next.changeLanguage(this.value, updateContent);
-    //     localStorage.setItem("settings-language", this.value);
-    //     $("html").attr("lang", this.value);
-    // });
     updateContent();
 }
 
@@ -62,7 +67,9 @@ function getLanguage(LANGUAGES){
         localStorage.setItem("settings-language", language);
     }
 
-    //$(".dropbtn4").val(language).trigger("change");
+    console.debug(`Language set to: ${language}`);
+
+    $(".dropbtn4").val(language).trigger("change");
 }
 
 /**

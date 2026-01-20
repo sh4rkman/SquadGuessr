@@ -1,0 +1,54 @@
+{
+    "menu": {
+        "gameMode": "游戏模式",
+        "classic": "经典模式",
+        "findMap": "寻找地图",
+        "topScore": "最高得分：",
+        "buttons": {
+            "next": "下一步"
+        }
+    },
+    "timer": {
+        "timer": "计时器",
+        "chill": "休闲",
+        "timed": "限时",
+        "rush": "冲刺",
+        "takeYourTime": "慢慢来",
+        "oneMinutePerGuess": "每次猜测1分钟",
+        "fifteenSecondsPerGuess": "每次猜测15秒",
+        "buttons": {
+            "back": "返回",
+            "play": "开始游戏",
+            "loading": "加载中..."
+        }
+    },
+    "game": {
+        "km": "km",
+        "m": "m",
+        "s": "秒",
+        "guessPlaceHolder": "这是什么地图?..",
+        "buttons": {
+            "guess": "结果",
+            "next": "下一个",
+            "results": "结果"
+        }
+    },
+    "results": {
+        "guesses": "猜猜内容",
+        "finalscore": "最终得分",
+        "resultCopied": "最终得分已复制",
+        "shareItWithYourFriends": "在社区中和你的朋友分享你的得分！",
+        "buttons": {
+            "playagain": "再来一局！",
+            "menu": "返回菜单",
+            "share": "分享"
+        }
+    },
+    "shared": {
+        "submitFeature": "提交你的创意",
+        "reportBug": "报告一个Bug",
+        "discord": "加入我们的Discord",
+        "points": "得分"
+    },
+    "desc": "找到这张图片在地图中的哪个位置"
+}

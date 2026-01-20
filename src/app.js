@@ -1,6 +1,8 @@
 // Node Modules
 import "animate.css";
 import "leaflet/dist/leaflet.css";
+import "select2/dist/css/select2.min.css";
+import "select2/dist/js/select2.min.js";
 
 // Local Styles
 
@@ -26,10 +28,10 @@ var options = {
     supportedLanguages: [
         ["en", "EN"],
         ["zh", "中文"],
-        ["uk", "UKR"],
-        ["ru", "РУС"],
-        ["fr", "FR"],
-        ["de", "DE"]
+        // ["uk", "UKR"],
+        // ["ru", "РУС"],
+        // ["fr", "FR"],
+        // ["de", "DE"]
     ],
     mapSize: 256,
 };

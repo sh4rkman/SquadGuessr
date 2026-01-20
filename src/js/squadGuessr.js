@@ -56,6 +56,7 @@ export default class SquadGuessr {
         this.initializeCore();
         this.setupEventListeners();
         console.log(`SquadGuessr v${this.version} Loaded!`);
+        this.switchUI("menu");
     }
 
     initializeCore() {
@@ -65,7 +66,7 @@ export default class SquadGuessr {
         this.userSettings.init();
         this.loadMinimap();
         this.loadUI();
-        //updateContent();
+        //this.updateContent();
         this.selectMode("classic");
         this.selectTimer("0");
     }
