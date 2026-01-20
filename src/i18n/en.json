@@ -45,8 +45,6 @@
         }
     },
     "shared": {
-        "submitFeature": "Submit your ideas",
-        "reportBug": "Report a bug",
         "discord": "Join the Discord",
         "points": "Points"
     },

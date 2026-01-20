@@ -45,8 +45,6 @@
         }
     },
     "shared": {
-        "submitFeature": "提交你的创意",
-        "reportBug": "报告一个Bug",
         "discord": "加入我们的Discord",
         "points": "得分"
     },

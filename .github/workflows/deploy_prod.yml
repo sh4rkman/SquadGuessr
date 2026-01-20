@@ -38,4 +38,4 @@ jobs:
               with:
                   args: |
                       New version has been deployed on squadguessr.app
-                      **Commit**: ${{ github.event.head_commit.message }}
+                      **Full Changelog**: https://github.com/sh4rkman/SquadGuessr/blob/master/CHANGELOG.md
