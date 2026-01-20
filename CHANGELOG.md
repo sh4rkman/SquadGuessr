@@ -1,3 +1,14 @@
+# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **1.2.0** *(2026-01-20)*
+
+</br><img src="https://img.shields.io/badge/-new%20features-green">
+- Added support for additional languages
+- Added ZH locales
+
+</br><img src="https://img.shields.io/badge/-bug%20fix-firebrick">
+- Fixed weird page shifting on small screens
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
 
 # <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **1.1.0** *(2026-01-09)*
 
