@@ -67,8 +67,7 @@ function getLanguage(LANGUAGES){
         localStorage.setItem("settings-language", language);
     }
 
-    console.debug(`Language set to: ${language}`);
-
+    // Set the language selector to the correct language
     $(".dropbtn4").val(language).trigger("change");
 }
 
