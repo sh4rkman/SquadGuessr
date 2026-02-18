@@ -28,7 +28,7 @@ Format don't matter as i will convert everything to `.webp` with a script anyway
 
 <div align="center"><img src="./public/img/github/debug.png" alt="squadcalc logo"></div></br>
 
-4. Start a new classic game to show the map, then in the console type `debugChangeMap('yourmapname')` to change the map to your taste
+4. Start a new classic game to show any map, then in the console type `debugChangeMap('yourmapname')` to change the map to show the map you took your screenshot on"
 
 <div align="center"><img src="./public/img/github/debugCmd.png" alt="squadcalc logo"></div>
 
