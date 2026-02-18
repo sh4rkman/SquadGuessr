@@ -18,7 +18,7 @@
 
 </br>
 
-1. Take your screenshot ingame, it should be a square and **at least 900px*900px**.  
+1. Take your screenshot ingame (go into "screenshot mode" by clicking the eye icon at bottom of screen in main menu to remove compass, and Shift+P ingame for free camera), it should be a square and **at least 900px*900px**.  
 Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.  
 Format don't matter as i will convert everything to `.webp` with a script anyway.
 
@@ -28,7 +28,7 @@ Format don't matter as i will convert everything to `.webp` with a script anyway
 
 <div align="center"><img src="./public/img/github/debug.png" alt="squadcalc logo"></div></br>
 
-4. Start a new classic game to show the map, then in the console type `debugChangeMap('yourmapname')` to change the map to your taste
+4. Start a new classic game to show any map, then in the console type `debugChangeMap('yourmapname')` to change the map to show the map you took your screenshot on
 
 <div align="center"><img src="./public/img/github/debugCmd.png" alt="squadcalc logo"></div>
 
@@ -50,7 +50,8 @@ Format don't matter as i will convert everything to `.webp` with a script anyway
     "mode": "easy",
     "url": "/img/guesses/yourimagename.webp",
     "lat": -1402.4167693765319,
-    "lng": 1438.0344360576973
+    "lng": 1438.0344360576973,
+    "submitter": "your preferred nickname/ingame-nick here"
 },
 ```
 
