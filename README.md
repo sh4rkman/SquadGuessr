@@ -18,7 +18,8 @@
 
 </br>
 
-1. Take your screenshot ingame (go into "screenshot mode" by clicking the eye icon at bottom of screen in main menu to remove compass, and Shift+P ingame for free camera), it should be a square and **at least 900px*900px**. Please consider taking your screenshots at quite high graphics settings for best UX on squadguessr. Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.  
+1. Take your screenshot ingame (go into "screenshot mode" by clicking the eye icon at bottom of screen in main menu to remove compass, and Shift+P ingame for free camera), it should be a square and **at least 900px*900px**. Please consider taking your screenshots at quite high graphics settings for best UX on squadguessr.
+Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.  
 Format don't matter as i will convert everything to `.webp` with a script anyway.
 
 3. Open console on your browser (F12)
