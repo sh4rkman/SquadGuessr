@@ -265,7 +265,7 @@ export default class SquadGuessr {
             // Decode the base64 data
             const decodedString = atob(result.data);
             const data = JSON.parse(decodedString);
-
+            console.debug("Guesses data fetched successfully:", data);
             return data;
         } catch (error) {
             console.debug("Error fetching guesses data, is API down ?");
@@ -331,6 +331,13 @@ export default class SquadGuessr {
             $hint.attr("src", "");
             $hint.attr("src", `/api/v2${this.currentGuess.url}`);
 
+            if (this.currentGuess.submitter) {
+                $("#submitter").html(i18next.t("game.hintBy", { ns: "common" }) + " " + this.currentGuess.submitter);
+            }
+            else {
+                $("#submitter").html("");
+            }
+           
 
             // // Check if already loaded (cached)
             // if ($hint[0].complete && $hint[0].naturalHeight !== 0) {
@@ -538,8 +545,7 @@ export default class SquadGuessr {
     // ===== UI MANAGEMENT =====
 
     switchUI(page) {
-        console.debug("switching UI to", page);
-        // TODO add timerWrapper into "scorehidden" just to be sure
+
         const uiStates = {
             menu: {
                 show: ["#menu", "#footerLogos"],

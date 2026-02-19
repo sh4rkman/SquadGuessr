@@ -51,7 +51,10 @@
             <%= require('html-loader!./footer/footer.html').default %>
             
             <div id="imageOverlay" class="hidden">
-                <img id="overlayImage">
+                <div class="imageWrapper">
+                    <img id="overlayImage">
+                    <span id="closeButton">×</span>
+                </div>
             </div>
 
         </body>

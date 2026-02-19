@@ -27,6 +27,7 @@
         "m": "m",
         "s": "s",
         "guessPlaceHolder": "What map is that..",
+        "hintBy": "Submitted by",
         "buttons": {
             "guess": "GUESS",
             "next": "NEXT",

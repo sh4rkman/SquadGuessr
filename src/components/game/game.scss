@@ -220,6 +220,17 @@
             border-radius: 0 10px;
             font-size: 1.3em;
             background: rgba(0, 0, 0, 0.6);
+
+        }
+
+        #submitter {
+            position: absolute;
+            bottom: 4px;
+            left: 8px;
+            font-style: italic;
+            font-size: 0.75em;
+            opacity: 0.75;
+            letter-spacing: 0.05em;
         }
 
         .preview-icon {
