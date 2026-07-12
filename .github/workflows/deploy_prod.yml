@@ -29,13 +29,13 @@ jobs:
                       npm ci
                       npm run build
 
-            - name: Discord notification
-              env:
-                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-                  DISCORD_USERNAME: "Github bot"
-                  DISCORD_AVATAR: "https://i.imgur.com/B8YYfaf.png"
-              uses: Ilshidur/action-discord@master
-              with:
-                  args: |
-                      New version has been deployed on squadguessr.app
-                      **Full Changelog**: https://github.com/sh4rkman/SquadGuessr/blob/master/CHANGELOG.md
+            # - name: Discord notification
+            #   env:
+            #       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+            #       DISCORD_USERNAME: "Github bot"
+            #       DISCORD_AVATAR: "https://i.imgur.com/B8YYfaf.png"
+            #   uses: Ilshidur/action-discord@master
+            #   with:
+            #       args: |
+            #           New version has been deployed on squadguessr.app
+            #           **Full Changelog**: https://github.com/sh4rkman/SquadGuessr/blob/master/CHANGELOG.md
