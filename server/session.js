@@ -257,7 +257,10 @@ export class Session {
     }
 
     toLobby(conn) {
-        if (this.phase !== "final") return this.error(conn, "INVALID");
+        // the last reveal counts as over: players see their results without waiting for the host's "next",
+        // and one of them may have become host there
+        const lastReveal = this.phase === "reveal" && this.round + 1 === this.guesses.length;
+        if (this.phase !== "final" && !lastReveal) return this.error(conn, "INVALID");
         this.phase = "lobby";
         this.guesses = [];
         this.round = 0;

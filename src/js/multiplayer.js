@@ -359,7 +359,8 @@ export default class Multiplayer {
         // any answer from the server unlocks NEXT / RESULTS (see next())
         clearTimeout(this.nextTimer);
         this.app.BUTTON_NEXT.prop({ hidden: s.phase !== "reveal" || !host || last, disabled: false });
-        this.app.BUTTON_RESULTS.prop({ hidden: s.phase !== "reveal" || !host || !last, disabled: false });
+        // after the last round every player may look at the results; the big screen follows the host
+        this.app.BUTTON_RESULTS.prop({ hidden: s.phase !== "reveal" || !last || this.watching, disabled: false });
         // the lobby stays on screen while the first round loads: the start went through, the settings are fixed
         this.app.setButtonLoading($("#BUTTON_MP_START"), loading || Boolean(this.guessFetch));
         $("#mpSettings select").prop("disabled", s.phase !== "lobby");
@@ -376,7 +377,9 @@ export default class Multiplayer {
             $("#mpStatus").prop("hidden", false);
             return;
         }
-        if (s.phase === "reveal") $("#mpStatus").text(i18next.t("mp.waitingForHost", { ns: "common" })).prop("hidden", host);
+        if (s.phase === "reveal") {
+            $("#mpStatus").text(i18next.t("mp.waitingForHost", { ns: "common" })).prop("hidden", host || (last && !this.watching));
+        }
         if (s.phase !== "round") return;
         const online = s.players.filter(p => p.connected);
         const text = i18next.t("mp.waitingForPlayers", {
@@ -495,6 +498,7 @@ export default class Multiplayer {
         // a reconnect resends the reveal: it is already on screen (drawing it again would stack every marker)
         if (msg.index === this.revealIndex && app.currentGuess?.url === solution.url) return;
         this.revealIndex = msg.index;
+        this.lastReveal = msg;
 
         clearInterval(this.countdown);
         app.stopTimer();
@@ -597,6 +601,17 @@ export default class Multiplayer {
         return new guessMarker(this.toMap(result), { draggable: false, ...options }, mm)
             .addTo(mm.markersGroup)
             .bindTooltip(label, { permanent: true, direction: "top", offset: [0, -45], className: "mpTooltip" });
+    }
+
+    /**
+     * The host moves everyone on to the final screen; anyone else just goes there on their own:
+     * the last reveal already holds the final scores, sorted
+     */
+    showResults() {
+        if (this.isHost()) return this.next();
+        const ranking = this.lastReveal.results.map(r => ({ id: r.id, name: r.name, score: r.score }));
+        const top = ranking[0]?.score;
+        this.onFinal({ ranking, winners: ranking.filter(r => r.score === top).map(r => r.id) });
     }
 
     onFinal(msg) {

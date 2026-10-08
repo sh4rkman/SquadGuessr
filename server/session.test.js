@@ -265,6 +265,20 @@ test("final ranking with a tie has two winners, lobby resets", () => {
     assert.deepEqual(state.players.map(p => p.score), [0, 0]);
 });
 
+test("back to the lobby is allowed from the last reveal (players may already be on their results), not earlier", () => {
+    const { s, host } = started();
+    s.handle(host, { type: "endRound" });
+    s.handle(host, { type: "lobby" });
+    assert.equal(s.phase, "reveal");
+    for (let i = 0; i < 2; i++) {
+        readyAll(s, s.round + 1);
+        s.handle(host, { type: "next" });
+        s.handle(host, { type: "endRound" });
+    }
+    s.handle(host, { type: "lobby" });
+    assert.equal(s.phase, "lobby");
+});
+
 test("watchers receive state and rounds but cannot act", () => {
     const { s, host, last } = withGuest();
     const tv = {};
