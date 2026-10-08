@@ -1,0 +1,36 @@
+<div id="review">
+
+    <div class="review-head">
+        <button id="BUTTON_REVIEW_BACK" data-i18n="common:timer.buttons.back"></button>
+        <h1 data-i18n="common:review.title"></h1>
+        <button id="BUTTON_REVIEW_ADD" data-i18n="common:review.buttons.add"></button>
+        <button id="BUTTON_REVIEW_CLEAR" data-i18n="common:review.buttons.clear" disabled></button>
+        <button id="BUTTON_REVIEW_EXPORT" disabled></button>
+    </div>
+
+    <div id="reviewDrop" data-i18n="common:review.dropHint"></div>
+
+    <div id="reviewMain" hidden>
+        <div class="review-info">
+            <span id="reviewProgress"></span>
+            <span id="reviewMap"></span>
+            <span><span data-i18n="common:review.by"></span> <span id="reviewSubmitter"></span></span>
+            <span id="reviewZip"></span>
+        </div>
+        <div class="review-work">
+            <div class="review-image">
+                <img id="reviewImage" alt="">
+            </div>
+            <div id="reviewMinimap"></div>
+        </div>
+        <p id="reviewError" hidden></p>
+        <div id="reviewDecision">
+            <button id="BUTTON_REVIEW_REJECT" data-i18n="common:review.buttons.reject"></button>
+            <button id="BUTTON_REVIEW_ACCEPT" data-i18n="common:review.buttons.accept"></button>
+        </div>
+        <div id="reviewStrip"></div>
+    </div>
+
+    <input type="file" id="reviewFiles" accept=".zip,application/zip" multiple hidden />
+
+</div>

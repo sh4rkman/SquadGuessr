@@ -8,6 +8,8 @@ import i18next from "i18next";
 import { solutionMarker } from "./guessMarker.js";
 import { pointsForDistance, scoreAnswer, distance } from "./scoring.js";
 import Multiplayer from "./multiplayer.js";
+import Submit from "./submit.js";
+import Review from "./review.js";
 import { copyText } from "./clipboard.js";
 import { retryDelay } from "./preloader.js";
 import "./libs/leaflet-measure-path.js";
@@ -39,6 +41,8 @@ export default class SquadGuessr {
         this.timerInterval = null;
         this.session = false;
         this.mp = new Multiplayer(this);
+        this.submit = new Submit(this);
+        this.review = new Review(this);
     }
 
     initializeElements() {
@@ -63,6 +67,8 @@ export default class SquadGuessr {
         console.log(`SquadGuessr v${this.version} Loaded!`);
         this.switchUI("menu");
         this.mp.init();
+        this.submit.init();
+        this.review.init();
     }
 
     initializeCore() {
@@ -154,7 +160,28 @@ export default class SquadGuessr {
         this.MAIN_LOGO.on("click", () => {
             this.stopTimer();
             if (this.mp.active) return this.mp.leave();
-            this.switchUI("menu");
+            this.toMenu();
+        });
+    }
+
+    /**
+     * Back to the menu from any view; the URL loses ?submit, ?review, ?join or ?watch, so a reload lands on the menu too
+     */
+    toMenu() {
+        history.replaceState({}, "", "/");
+        this.switchUI("menu");
+    }
+
+    /**
+     * Makes the browser ask before the page is left while isUnsaved() is true
+     * @param {function(): boolean} isUnsaved
+     */
+    warnOnLeave(isUnsaved) {
+        window.addEventListener("beforeunload", (e) => {
+            if (!isUnsaved()) return;
+            e.preventDefault();
+            // older browsers only ask when returnValue is set
+            e.returnValue = true;
         });
     }
 
@@ -536,30 +563,36 @@ export default class SquadGuessr {
 
     switchUI(page) {
 
+        // every page plus the footer logos: whatever a state does not show gets hidden
+        const parts = ["#menu", "#timer_ui", "#map_ui", "#results", "#lobby", "#submit", "#review", "#footerLogos"];
+
         const uiStates = {
             menu: {
                 show: ["#menu", "#footerLogos"],
-                hide: ["#map_ui", "#timer_ui", "#results", "#lobby"],
                 scoreHidden: true
             },
             timer: {
                 show: ["#timer_ui", "#footerLogos"],
-                hide: ["#menu", "#map_ui", "#results", "#lobby"],
                 scoreHidden: true
             },
             game: {
                 show: ["#map_ui"],
-                hide: ["#menu", "#timer_ui", "#results", "#footerLogos", "#lobby"],
                 scoreHidden: false
             },
             results: {
                 show: ["#results", "#footerLogos"],
-                hide: ["#map_ui", "#timer_ui", "#menu", "#lobby"],
                 scoreHidden: true
             },
             lobby: {
                 show: ["#lobby", "#footerLogos"],
-                hide: ["#map_ui", "#timer_ui", "#menu", "#results"],
+                scoreHidden: true
+            },
+            submit: {
+                show: ["#submit", "#footerLogos"],
+                scoreHidden: true
+            },
+            review: {
+                show: ["#review", "#footerLogos"],
                 scoreHidden: true
             }
         };
@@ -568,7 +601,7 @@ export default class SquadGuessr {
         if (!state) return;
 
         state.show.forEach(selector => $(selector).fadeIn(400));
-        state.hide.forEach(selector => $(selector).hide());
+        parts.filter(selector => !state.show.includes(selector)).forEach(selector => $(selector).hide());
         $("#score").prop("hidden", state.scoreHidden);
         $("#mapName").hide();
         this.stopTimer();

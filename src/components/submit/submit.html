@@ -1,0 +1,40 @@
+<div id="submit">
+
+    <h1 data-i18n="common:submit.title"></h1>
+    <p class="submit-steps" data-i18n="common:submit.steps"></p>
+
+    <div class="submit-fields">
+        <input type="text" id="submitName" maxlength="40" autocomplete="off" data-i18n-placeholder="common:submit.namePlaceholder" />
+        <select id="submitMapSelect" autocomplete="off">
+            <option value="" disabled selected data-i18n="common:submit.chooseMap"></option>
+        </select>
+    </div>
+
+    <div class="submit-work">
+        <div id="submitImage" tabindex="0">
+            <p class="submit-hint" data-i18n="common:submit.pasteHint"></p>
+            <button id="BUTTON_SUBMIT_CLEAR_IMAGE" type="button" data-i18n-title="common:submit.removeImage" data-i18n-aria-label="common:submit.removeImage">✕</button>
+            <div class="submit-crop">
+                <img id="submitPreview" alt="" draggable="false">
+                <div id="submitFrame"></div>
+            </div>
+        </div>
+        <div id="submitMinimap"></div>
+    </div>
+    <input type="file" id="submitFile" accept="image/*" hidden />
+
+    <div class="button-container">
+        <button id="BUTTON_SUBMIT_BACK" data-i18n="common:timer.buttons.back"></button>
+        <button id="BUTTON_SUBMIT_CANCEL" data-i18n="common:submit.buttons.cancel" hidden></button>
+        <button id="BUTTON_SUBMIT_ADD" disabled></button>
+    </div>
+
+    <ul id="submitList"></ul>
+
+    <button id="BUTTON_SUBMIT_DOWNLOAD" disabled></button>
+    <p class="submit-discord">
+        <span data-i18n="common:submit.discordHint"></span>
+        <a href="https://discord.gg/BNPAc5kEJP" target="_blank" rel="noopener noreferrer">Discord</a>
+    </p>
+
+</div>

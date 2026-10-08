@@ -54,8 +54,7 @@ export default class Multiplayer {
         $("#BUTTON_MP_BACK").on("click", () => {
             // a connection attempt may still be retrying (e.g. server unreachable): abandon it
             if (this.active) this.stop();
-            history.replaceState({}, "", "/");
-            this.app.switchUI("menu");
+            this.app.toMenu();
         });
         $("#BUTTON_MP_CREATE").on("click", () => this.create());
         $("#BUTTON_MP_JOIN").on("click", () => this.join($("#mpCode").val()));
@@ -245,8 +244,7 @@ export default class Multiplayer {
         // a big-screen tab never held a player token: it must not drop the one the player tab next to it uses
         if (this.code && !this.watching) localStorage.removeItem(`mp:${this.code}`);
         this.stop();
-        history.replaceState({}, "", "/");
-        this.app.switchUI("menu");
+        this.app.toMenu();
     }
 
     // ===== MESSAGES =====
@@ -303,8 +301,7 @@ export default class Multiplayer {
         if (code === "REPLACED") {
             // the same player went on in another tab or on another device, which keeps using the stored token
             this.stop();
-            history.replaceState({}, "", "/");
-            this.app.switchUI("menu");
+            this.app.toMenu();
             return this.toast("warning", "mp.errors.REPLACED");
         }
         this.toast("error", `mp.errors.${code}`);

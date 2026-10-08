@@ -91,5 +91,32 @@
             "KICKED": "房主已将你移出房间"
         }
     },
+    "submit": {
+        "open": "提交截图",
+        "title": "提交猜测图",
+        "steps": "选择地图，粘贴截图，把方框拖到最合适的位置，然后在地图上点击截图的拍摄位置。",
+        "namePlaceholder": "你的名字（可选）",
+        "chooseMap": "选择地图…",
+        "pasteHint": "粘贴截图（Ctrl+V）、拖放到此处或点击选择文件",
+        "discordHint": "请将 ZIP 文件上传到以下平台的建议频道：",
+        "remove": "删除",
+        "removeImage": "移除图片",
+        "edit": "编辑",
+        "choice": {
+            "submit": "提交",
+            "review": "审核"
+        },
+        "buttons": {
+            "save": "保存",
+            "cancel": "取消",
+            "add": "添加",
+            "download": "下载 ZIP"
+        },
+        "errors": {
+            "notImage": "此文件不是图片",
+            "tooSmall": "图片太小：至少需要 900×900 像素（当前：{{width}}×{{height}}）",
+            "noWebp": "你的浏览器无法生成 WebP 图片，请使用 Chrome、Edge 或 Firefox"
+        }
+    },
     "desc": "找到这张图片在地图中的哪个位置"
 }

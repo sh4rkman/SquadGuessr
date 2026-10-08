@@ -18,41 +18,30 @@
 
 </br>
 
-1. Take your screenshot ingame (go into "screenshot mode" by clicking the eye icon at bottom of screen in main menu to remove compass, and Shift+P ingame for free camera), it should be a square and **at least 900px*900px**. Please consider taking your screenshots at quite high graphics settings for best UX on squadguessr.
-Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.  
-Format don't matter as i will convert everything to `.webp` with a script anyway.
+1. Take your screenshot ingame (go into "screenshot mode" by clicking the eye icon at bottom of screen in main menu to remove compass, and Shift+P ingame for free camera). Its shorter side must be **at least 900px**. Please consider taking your screenshots at quite high graphics settings for best UX on squadguessr.
+Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.
 
-3. Open console on your browser (F12)
+2. Open SquadGuessr, click **SUBMIT A GUESS** in the menu and then **SUBMIT** (or go to `/?submit`).
 
-4. Enable "Debug" logging
+3. Choose the map, paste your screenshot with Ctrl+V (or drop/choose the file), drag the square onto the part you want to show and click on the map where the screenshot was taken. Click **ADD** and repeat for more screenshots. Click a guess in the list to correct it, then **SAVE**.
 
-<div align="center"><img src="./public/img/github/debug.png" alt="squadcalc logo"></div></br>
-
-4. Start a new classic game to show any map, then in the console type `debugChangeMap('yourmapname')` to change the map to show the map you took your screenshot on
-
-<div align="center"><img src="./public/img/github/debugCmd.png" alt="squadcalc logo"></div>
+4. Click **DOWNLOAD ZIP** and upload the ZIP on [Discord](https://discord.gg/BNPAc5kEJP) (suggestion channel).
 
 </br>
 
-5. Click where your screenshot is taken from
+## Reviewing submissions
 
-<div align="center"><img src="./public/img/github/latlng.png" alt="squadcalc logo"></div>
-
-
-</br>
-
-6. Submit your screenshot + latlng on [Discord](https://discord.gg/BNPAc5kEJP) (suggestion channel), e.g. : 
-
+Click **SUBMIT A GUESS** → **REVIEW** in the menu (or go to `/?review`), drop the ZIPs from Discord onto the page and accept (`A`) or reject (`D`) every guess. Images in a ZIP may be WebP, PNG or JPEG (up to 32 MB). **EXPORT** downloads one ZIP with the accepted guesses: `guesses.json` and the images under `img/guesses/`, every one turned into a 900×900 WebP (the centred square) under a new random name. **CLEAR** empties the review for the next batch. Every entry looks like this:
 
 ```json
-{ 
-    "map": "narva",
+{
+    "map": "Narva",
     "mode": "easy",
-    "url": "/img/guesses/yourimagename.webp",
+    "url": "/img/guesses/PTWxNN2RRl9vC8G.webp",
     "lat": -1402.4167693765319,
     "lng": 1438.0344360576973,
     "submitter": "your preferred nickname/ingame-nick here"
-},
+}
 ```
 
 </br></br></br>

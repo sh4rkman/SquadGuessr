@@ -29,7 +29,7 @@ export function validGuesses(guesses, rounds) {
     return Array.isArray(guesses) && guesses.length === rounds && guesses.every(validGuess);
 }
 
-function validGuess(g) {
+export function validGuess(g) {
     return Boolean(g)
         && typeof g.map === "string" && Boolean(findMap(g.map))
         && typeof g.url === "string" && g.url.length <= 200 && URL_PATTERN.test(g.url) && !g.url.includes("..")

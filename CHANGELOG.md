@@ -4,6 +4,8 @@
 - Added "Play with friends": join a session from your phone by code/QR, play synchronized rounds and find out who wins
 - Added a big-screen view for projectors/TVs: WATCH with the session code instead of joining
 - Added Docker Compose hosting (frontend + multiplayer server)
+- Added "Submit a guess": paste a screenshot, choose its square, click where it was taken and download a ZIP to post on Discord
+- Added a review page (menu SUBMIT A GUESS → REVIEW, or `?review`) to check submitted ZIPs and export the accepted guesses
 - Multiplayer rounds start for everyone at the same moment, once every phone has loaded the images; the next round's images load in the background while you play
 
 </br><img src="https://img.shields.io/badge/-bug%20fix-firebrick">

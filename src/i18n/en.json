@@ -91,5 +91,48 @@
             "KICKED": "The host removed you from the session"
         }
     },
+    "submit": {
+        "open": "SUBMIT A GUESS",
+        "title": "Submit a guess",
+        "steps": "Choose the map, paste your screenshot, drag the square onto the best part, then click on the map where the screenshot was taken.",
+        "namePlaceholder": "Your name (optional)",
+        "chooseMap": "Choose a map…",
+        "pasteHint": "Paste a screenshot (Ctrl+V), drop it here or click to choose a file",
+        "discordHint": "Upload the ZIP in the suggestions channel on",
+        "remove": "Remove",
+        "removeImage": "Remove image",
+        "edit": "Edit",
+        "choice": {
+            "submit": "SUBMIT",
+            "review": "REVIEW"
+        },
+        "buttons": {
+            "save": "SAVE",
+            "cancel": "CANCEL",
+            "add": "ADD",
+            "download": "DOWNLOAD ZIP"
+        },
+        "errors": {
+            "notImage": "This file is not an image",
+            "tooSmall": "Image too small: at least 900×900 px needed (yours: {{width}}×{{height}})",
+            "noWebp": "Your browser cannot create WebP images. Please use Chrome, Edge or Firefox"
+        }
+    },
+    "review": {
+        "title": "Review guesses",
+        "dropHint": "Drop ZIP files here or click to choose",
+        "by": "by",
+        "loadProblems": "Some guesses were not loaded",
+        "duplicates": "{{n}} duplicate guesses skipped",
+        "exportFailed": "Export failed",
+        "confirmClear": "Clear the review? Decisions that were not exported will be lost.",
+        "buttons": {
+            "add": "ADD ZIP",
+            "clear": "CLEAR",
+            "accept": "ACCEPT (A)",
+            "reject": "REJECT (D)",
+            "export": "EXPORT"
+        }
+    },
     "desc": "Find where the screenshot has been taken"
 }
