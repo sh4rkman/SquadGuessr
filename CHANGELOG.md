@@ -1,4 +1,4 @@
-# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **1.4.0** *(unreleased)*
+# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **2.0.0** *(2026-10-08)*
 
 </br><img src="https://img.shields.io/badge/-new%20features-green">
 - Added "Play with friends": join a session from your phone by code/QR, play synchronized rounds and find out who wins
