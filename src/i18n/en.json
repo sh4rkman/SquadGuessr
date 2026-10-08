@@ -58,8 +58,10 @@
         "code": "Code",
         "rounds": "rounds",
         "waitingForHost": "Waiting for the host…",
+        "needPlayers": "Waiting for at least one other player",
         "waitingForPlayers": "Waiting for others ({{answered}}/{{total}})",
         "loadingImages": "Loading images… ({{ready}}/{{total}})",
+        "startingIn": "Starting in {{seconds}} s…",
         "gameRunning": "This game has already started. You can still watch it.",
         "reconnecting": "Reconnecting…",
         "enterName": "Enter your name first",
@@ -73,6 +75,8 @@
             "create": "CREATE SESSION",
             "join": "JOIN",
             "start": "START",
+            "ready": "READY",
+            "cancel": "CANCEL",
             "leave": "LEAVE",
             "endRound": "END ROUND",
             "watch": "WATCH"
@@ -88,6 +92,7 @@
             "CODE": "Enter the 4-character code",
             "SERVER_BUSY": "Too many sessions right now, try again later",
             "REPLACED": "You went on playing in another tab or on another device",
+            "NO_PLAYERS": "At least one other player has to join first",
             "KICKED": "The host removed you from the session"
         }
     },

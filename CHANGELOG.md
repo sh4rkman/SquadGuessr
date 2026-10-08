@@ -7,6 +7,7 @@
 - Added "Submit a guess": paste a screenshot, choose its square, click where it was taken and download a ZIP to post on Discord
 - Added a review page (menu SUBMIT A GUESS → REVIEW, or `?review`) to check submitted ZIPs and export the accepted guesses
 - Multiplayer rounds start for everyone at the same moment, once every phone has loaded the images; the next round's images load in the background while you play
+- Multiplayer guests can mark themselves ready; every start counts down (5 s when everyone is ready, 15 s when the host starts anyway) while all phones load the first round, and the host can call it off; the host can only start once at least one other player is there
 
 </br><img src="https://img.shields.io/badge/-bug%20fix-firebrick">
 - Fixed the timer never starting when a hint image fails to load; failed hint and map images are now retried

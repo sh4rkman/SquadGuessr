@@ -69,6 +69,31 @@
         border-radius: 10px;
         font-size: 1em;
     }
+    // READY is green, and START once every guest is ready (grey while locked: alone, or loading the guesses)
+    #BUTTON_MP_READY,
+    #BUTTON_MP_START.all-ready:not(:disabled) {
+        background: variables.$newColor;
+        &:hover {
+            background: variables.$newColorLight;
+        }
+    }
+    // READY gets a tick once the guest is ready
+    #BUTTON_MP_READY[aria-pressed="true"]::before {
+        content: "✓ ";
+    }
+    // secondary actions: outlined instead of filled
+    #BUTTON_MP_LEAVE {
+        background: transparent;
+        border: 2px solid #333;
+        &:hover {
+            background: #272727;
+        }
+    }
+    // the start countdown: what everyone in the room looks at
+    #mpLobbyStatus {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
 }
 
 // kept out of #lobby: an id selector would also beat the global button :active background
@@ -123,6 +148,10 @@
         }
         &.offline {
             opacity: 0.4;
+        }
+        // a ready guest's name turns green like their READY button
+        &.ready {
+            background: variables.$newColor;
         }
     }
     // host's kick icon inside a lobby chip: none of the big global button look
@@ -253,7 +282,8 @@ body.watch-mode {
     #score,
     #mpEntry,
     #mpWatchRow,
-    .mp-copy {
+    .mp-copy,
+    #BUTTON_MP_READY {
         display: none !important;
     }
     // leaflet sets pointer-events on its own layers, so the children need it too
