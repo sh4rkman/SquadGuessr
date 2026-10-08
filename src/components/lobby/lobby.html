@@ -1,5 +1,6 @@
 <div id="lobby">
 
+
     <div id="mpEntry">
         <h1 data-i18n="common:mp.title"></h1>
         <input type="text" id="mpName" maxlength="20" autocomplete="off" data-i18n-placeholder="common:mp.namePlaceholder" />
@@ -9,10 +10,8 @@
             <input type="text" id="mpCode" maxlength="4" autocomplete="off" data-i18n-placeholder="common:mp.codePlaceholder" />
             <button id="BUTTON_MP_JOIN" data-i18n="common:mp.buttons.join"></button>
         </div>
-        <div id="mpWatchOffer">
-            <p data-i18n="common:mp.gameRunning"></p>
-            <button id="BUTTON_MP_WATCH" data-i18n="common:mp.buttons.watch"></button>
-        </div>
+        <p id="mpGameRunning" data-i18n="common:mp.gameRunning"></p>
+        <button id="BUTTON_MP_WATCH" data-i18n="common:mp.buttons.watch"></button>
         <button id="BUTTON_MP_BACK" data-i18n="common:timer.buttons.back"></button>
     </div>
 
@@ -22,7 +21,16 @@
             <strong id="mpRoomCode"></strong>
         </div>
         <canvas id="mpQr"></canvas>
-        <p id="mpJoinUrl"></p>
+        <div class="mp-links">
+            <p>
+                <span id="mpJoinUrl"></span>
+                <button id="BUTTON_MP_COPY_JOIN" class="mp-copy" data-i18n-title="common:mp.copyJoinLink"><svg><use href="../shared/share.svg#share"></use></svg></button>
+            </p>
+            <p id="mpWatchRow">
+                <span id="mpWatchUrl"></span>
+                <button id="BUTTON_MP_COPY_WATCH" class="mp-copy" data-i18n-title="common:mp.copyWatchLink"><svg><use href="../shared/share.svg#share"></use></svg></button>
+            </p>
+        </div>
         <ul id="mpPlayers" class="mp-players"></ul>
         <p id="mpSettingsSummary"></p>
         <div id="mpSettings" class="host-only">
@@ -49,7 +57,6 @@
             <button id="BUTTON_MP_START" class="host-only" data-i18n="common:mp.buttons.start"></button>
             <button id="BUTTON_MP_CANCEL" class="host-only" data-i18n="common:mp.buttons.cancel" hidden></button>
         </div>
-        <a id="mpWatchLink" class="host-only" target="_blank" rel="noopener noreferrer" data-i18n="common:mp.showOnScreen"></a>
     </div>
 
 </div>

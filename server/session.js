@@ -13,7 +13,7 @@ export const LOAD_MS = 5 * 1000;
 export const COUNTDOWN_READY_MS = 5 * 1000;
 export const COUNTDOWN_FORCED_MS = 15 * 1000;
 
-const HOST_ACTIONS = ["settings", "start", "cancelStart", "endRound", "next", "lobby"];
+const HOST_ACTIONS = ["settings", "start", "cancelStart", "endRound", "next", "lobby", "kick"];
 
 /**
  * One multiplayer session: lobby → loading → round → reveal → loading → … → final
@@ -36,6 +36,7 @@ export class Session {
         this.startsAt = null;
         this.players = new Map();
         this.watchers = new Set();
+        this.kicked = new Set();
         this.lastActivity = now();
     }
 
@@ -53,6 +54,7 @@ export class Session {
     }
 
     join(conn, { name, token }) {
+        if (token && this.kicked.has(token)) return this.error(conn, "KICKED");
         const known = token ? this.findPlayer(p => p.token === token) : null;
         if (known) return this.reconnect(known, conn);
         if (this.phase !== "lobby") return this.error(conn, "GAME_RUNNING");
@@ -111,7 +113,22 @@ export class Session {
         case "endRound": return this.phase === "round" && this.deadline === null ? this.endRound() : this.error(conn, "INVALID");
         case "next": return this.next(conn);
         case "lobby": return this.toLobby(conn);
+        case "kick": return this.kick(conn, msg.playerId);
         }
+    }
+
+    /**
+     * Lobby only, and no ban: whoever is kicked can come back through the invite link, just not with their old token
+     */
+    kick(conn, playerId) {
+        if (this.phase !== "lobby" || playerId === this.hostId) return this.error(conn, "INVALID");
+        const player = this.players.get(playerId);
+        // already gone (double click, left at the same moment): nothing to do
+        if (!player) return;
+        // someone offline right now never gets the message: their reconnect with the old token is turned away instead
+        this.kicked.add(player.token);
+        this.error(player.conn, "KICKED");
+        this.leave(player);
     }
 
     updateSettings(conn, settings) {
@@ -291,7 +308,10 @@ export class Session {
     }
 
     toLobby(conn) {
-        if (this.phase !== "final") return this.error(conn, "INVALID");
+        // the last reveal counts as over: players see their results without waiting for the host's "next",
+        // and one of them may have become host there
+        const lastReveal = this.phase === "reveal" && this.round + 1 === this.guesses.length;
+        if (this.phase !== "final" && !lastReveal) return this.error(conn, "INVALID");
         this.phase = "lobby";
         this.guesses = [];
         this.round = 0;

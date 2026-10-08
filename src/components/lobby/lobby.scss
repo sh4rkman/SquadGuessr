@@ -45,19 +45,29 @@
         border-radius: 8px;
         image-rendering: pixelated;
     }
-    #mpJoinUrl {
+    // join and watch link, each with a button that copies it: one grid, so both buttons line up in one column
+    .mp-links {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 0.3em 0.5em;
         font-size: 0.8em;
-        opacity: 0.7;
-        word-break: break-all;
+        p {
+            display: grid;
+            grid-column: 1 / -1;
+            grid-template-columns: subgrid;
+            align-items: center;
+        }
+        span {
+            opacity: 0.7;
+            word-break: break-all;
+            text-align: center;
+        }
     }
     select {
         background: #272727;
         padding: 0.6em;
         border-radius: 10px;
         font-size: 1em;
-    }
-    #mpWatchLink {
-        color: #aaa;
     }
     // READY is green, and START once every guest is ready (grey while locked: alone, or loading the guesses)
     #BUTTON_MP_READY,
@@ -72,7 +82,6 @@
         content: "✓ ";
     }
     // secondary actions: outlined instead of filled
-    #BUTTON_MP_BACK,
     #BUTTON_MP_LEAVE {
         background: transparent;
         border: 2px solid #333;
@@ -84,6 +93,24 @@
     #mpLobbyStatus {
         font-size: 1.5em;
         font-weight: bold;
+    }
+}
+
+// kept out of #lobby: an id selector would also beat the global button :active background
+
+.mp-copy {
+    padding: 0.5em;
+    font-size: 1em;
+    border-radius: 8px;
+    background: #272727;
+    &:hover {
+        background: #333;
+    }
+    svg {
+        display: block;
+        width: 1.5em;
+        height: 1.5em;
+        fill: currentcolor;
     }
 }
 
@@ -125,6 +152,16 @@
         // a ready guest's name turns green like their READY button
         &.ready {
             background: variables.$newColor;
+        }
+    }
+    // host's kick icon inside a lobby chip: none of the big global button look
+    .mp-kick {
+        font-size: 1em;
+        padding: 0 0 0 0.5em;
+        &,
+        &:hover,
+        &:active {
+            background: none;
         }
     }
 }
@@ -244,6 +281,8 @@ body.watch-mode {
     #actions,
     #score,
     #mpEntry,
+    #mpWatchRow,
+    .mp-copy,
     #BUTTON_MP_READY {
         display: none !important;
     }
@@ -273,6 +312,10 @@ body.watch-mode {
         width: auto !important;
         height: auto !important;
         aspect-ratio: 1;
+    }
+    // the copy buttons are gone: no gap left before their empty column that would push the join link off center
+    #lobby .mp-links {
+        column-gap: 0;
     }
     #mpRoomCode {
         font-size: 5em;
@@ -383,11 +426,8 @@ body.watch-mode.mp-reveal {
             border-top: 1px solid #333;
         }
     }
-    #mpWatchOffer {
+    #mpGameRunning {
         display: none;
-        flex-direction: column;
-        gap: 0.8em;
-        width: 100%;
     }
     // the game already started: offer to watch instead of joining
     &.running {
@@ -397,8 +437,8 @@ body.watch-mode.mp-reveal {
         .mp-join {
             display: none;
         }
-        #mpWatchOffer {
-            display: flex;
+        #mpGameRunning {
+            display: block;
         }
     }
     // invite link: name + join only
@@ -410,7 +450,28 @@ body.watch-mode.mp-reveal {
             flex: 1;
         }
     }
+    // secondary actions: outlined instead of filled
+    #BUTTON_MP_WATCH,
+    #BUTTON_MP_BACK {
+        background: transparent;
+        border: 2px solid #333;
+        &:hover {
+            background: #272727;
+        }
+    }
     #BUTTON_MP_BACK {
         margin-top: 0.6em;
+    }
+    // icon and text on one line; the icon is decorative only (the empty alt text keeps screen readers at "watch")
+    #BUTTON_MP_WATCH {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5em;
+        &::before {
+            content: "📺" / "";
+            // emoji fonts draw the glyph lower than the capitals beside it: lifted onto their middle
+            translate: 0 -0.18em;
+        }
     }
 }
