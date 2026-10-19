@@ -27,9 +27,10 @@ export function cleanName(name) {
 }
 
 export function validSettings(s) {
-    // an older cached client sends no next
+    // an older cached client sends no next and no keepCode
     return Boolean(s) && MODES.includes(s.mode) && TIMERS.includes(s.timer) && ROUNDS.includes(s.rounds)
-        && (s.next === undefined || NEXTS.includes(s.next));
+        && (s.next === undefined || NEXTS.includes(s.next))
+        && (s.keepCode === undefined || typeof s.keepCode === "boolean");
 }
 
 export function validGuesses(guesses, rounds) {

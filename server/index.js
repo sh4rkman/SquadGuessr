@@ -10,6 +10,8 @@ const HEARTBEAT_MS = 30 * 1000;
 const MAX_SESSIONS = 1000;
 // far above any burst a real client needs; a client that stops reading must not make us queue replies forever
 const MAX_BUFFERED = 64 * 1024;
+// what a client may send first on a socket, besides "create"
+const ENTRY = ["join", "watch", "check", "peek"];
 
 /**
  * Multiplayer session server: routes socket messages to Session instances
@@ -28,11 +30,23 @@ export function startServer({ port = 3001, idleMs = IDLE_MS, maxSessions = MAX_S
         ws.send(serialized.get(msg));
     };
 
+    // the session under this code, or the one that played a finished game under it
+    // ponytail: scans every session for an old code; an index of old codes if sessions grow far beyond MAX_SESSIONS
+    const find = (code) => sessions.get(code) ?? [...sessions.values()].find(s => s.past.has(code));
+
     const newCode = () => {
         let code;
         do {
             code = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join("");
-        } while (sessions.has(code));
+        } while (find(code));
+        return code;
+    };
+
+    // PLAY AGAIN: the session moves on to a new code, the old one keeps leading to it (for its results)
+    const renew = (session) => {
+        const code = newCode();
+        sessions.delete(session.code);
+        sessions.set(code, session);
         return code;
     };
 
@@ -44,7 +58,7 @@ export function startServer({ port = 3001, idleMs = IDLE_MS, maxSessions = MAX_S
     };
 
     const route = (ws, msg) => {
-        if (["create", "join", "watch", "check"].includes(msg.type)) {
+        if (msg.type === "create" || ENTRY.includes(msg.type)) {
             // the client opens a new socket for every attempt: one per socket means spamming sessions or guessing codes costs a connection each
             if (ws.greeted) return send(ws, { type: "error", code: "INVALID" });
             ws.greeted = true;
@@ -53,19 +67,22 @@ export function startServer({ port = 3001, idleMs = IDLE_MS, maxSessions = MAX_S
             if (sessions.size >= maxSessions) evictOrphan();
             // bounds memory and keeps newCode() far from exhausting the 32^4 code space
             if (sessions.size >= maxSessions) return send(ws, { type: "error", code: "SERVER_BUSY" });
-            const session = new Session(newCode(), { send });
+            const session = new Session(newCode(), { send, newCode: () => renew(session) });
             if (session.create(ws, msg)) {
                 sessions.set(session.code, session);
                 sessionOf.set(ws, session);
             }
             return;
         }
-        if (["join", "watch", "check"].includes(msg.type)) {
-            const session = typeof msg.code === "string" && sessions.get(msg.code.toUpperCase());
+        if (ENTRY.includes(msg.type)) {
+            const code = typeof msg.code === "string" ? msg.code.toUpperCase() : null;
+            const session = find(code);
             if (!session) return send(ws, { type: "error", code: "SESSION_NOT_FOUND" });
-            // a check binds nothing: its close is no player leaving and no activity that keeps an orphaned session alive
+            // a check or a peek binds nothing: its close is no player leaving and no activity that keeps an orphaned session alive
             if (msg.type === "check") return session.check(ws, msg.token);
-            const ok = msg.type === "join" ? session.join(ws, msg) : session.watch(ws);
+            if (msg.type === "peek") return session.peek(ws, code, msg.token);
+            // watching ignores the code: a big screen on an old link keeps following the session
+            const ok = msg.type === "join" ? session.join(ws, msg, code) : session.watch(ws);
             if (ok) sessionOf.set(ws, session);
             return;
         }

@@ -54,9 +54,9 @@
         "play": "多人游戏",
         "title": "和好友一起玩",
         "namePlaceholder": "你的名字",
-        "codePlaceholder": "房间码",
+        "codePlaceholder": "邀请码",
         "orJoin": "或加入一个房间",
-        "code": "房间码",
+        "code": "邀请码",
         "rounds": "轮",
         "waitingForHost": "等待房主中...",
         "needPlayers": "等待至少一名其他玩家加入",
@@ -67,12 +67,16 @@
         "resultsIn": "{{seconds}} 秒后显示结果…",
         "nextHost": "房主",
         "nextAuto": "自动",
+        "codeNew": "每局更换",
+        "codeKeep": "保留",
         "settings": {
             "rounds": "轮数",
             "next": "下一轮",
-            "nextHint": "揭晓答案后下一轮何时开始。房主：由你点击“下一个”开始。自动：所选时间结束后为所有人自动开始。"
+            "nextHint": "揭晓答案后下一轮何时开始。房主：由你点击“下一个”开始。自动：所选时间结束后为所有人自动开始。",
+            "codeHint": "点击“再来一局！”后下一局是否使用新的邀请码。保留：邀请码和链接保持不变，直到大厅空置一段时间。"
         },
         "gameRunning": "游戏已经开始，你仍可以观看。",
+        "ended": "这局游戏已经结束了。",
         "reconnecting": "正在重新连接...",
         "enterName": "请先输入你的名字",
         "copyJoinLink": "复制加入链接",
@@ -91,7 +95,7 @@
             "kick": "将 {{name}} 移出房间？",
             "promote": "将 {{name}} 设为房主？之后你将成为普通玩家。"
         },
-        "confirmLeave": "确定离开房间吗？之后需要房间码才能重新加入。",
+        "confirmLeave": "确定离开房间吗？之后需要邀请码才能重新加入。",
         "left": "{{name}} 离开了房间",
         "resume": {
             "lobby": "你仍在房间 {{code}} 中",
@@ -117,7 +121,7 @@
             "NOT_HOST": "只有房主可以这样做",
             "INVALID": "无效请求",
             "GUESSES": "无法加载猜测记录",
-            "CODE": "请输入4位房间码",
+            "CODE": "请输入4位邀请码",
             "SERVER_BUSY": "当前房间数过多，请稍后再试",
             "REPLACED": "你已在其他标签页或设备上继续游戏",
             "NO_PLAYERS": "至少需要另一名玩家加入",

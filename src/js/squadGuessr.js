@@ -153,7 +153,7 @@ export default class SquadGuessr {
 
     setupNavigationButtons() {
         this.BUTTON_TIMER.on("click", () => { this.switchUI("timer"); });
-        this.BUTTON_MENU.on("click", () => { this.mp.active ? this.mp.leave() : this.switchUI("menu"); });
+        this.BUTTON_MENU.on("click", () => { this.mp.active ? this.mp.leave() : this.toMenu(); });
         this.BUTTON_BACK.on("click", () => { this.switchUI("menu"); });
         this.BUTTON_PLAYAGAIN.on("click", () => this.mp.active ? this.mp.send({ type: "lobby" }) : this.startNewGame());
         this.BUTTON_SHARE.on("click", () => this.copyResults());
@@ -171,6 +171,8 @@ export default class SquadGuessr {
      */
     toMenu() {
         history.replaceState({}, "", "/");
+        // results of a finished multiplayer game (opened through its old link) are left behind too
+        $("body").removeClass("mp-ended");
         this.switchUI("menu");
     }
 

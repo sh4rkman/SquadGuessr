@@ -246,11 +246,14 @@
 }
 
 #mpChips,
-#mpFinalRanking {
+#mpFinalRanking,
+#mpEnded {
     display: none;
 }
 
-body.mp-active {
+body.mp-active,
+body.mp-ended {
+    // mp-ended: the results of a finished game, opened through its link, look like the players' own
     #mpChips {
         display: flex;
         margin-top: 0.5em;
@@ -264,8 +267,13 @@ body.mp-active {
     }
 }
 
-body.watch-mode #BUTTON_PLAYAGAIN {
+body.watch-mode #BUTTON_PLAYAGAIN,
+body.mp-ended #BUTTON_PLAYAGAIN {
     display: none !important;
+}
+
+body.mp-ended #mpEnded {
+    display: block;
 }
 
 .host-only {

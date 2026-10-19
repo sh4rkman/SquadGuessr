@@ -47,6 +47,12 @@ test("validSettings: rush takes 5–30 s in 5 s steps; the next round comes from
     assert.equal(settings({ next: undefined }), true);
 });
 
+test("validSettings: keepCode is a boolean, and an older cached client sends none", () => {
+    const settings = (over) => validSettings({ mode: "classic", timer: 0, rounds: 5, ...over });
+    [true, false, undefined].forEach(keepCode => assert.equal(settings({ keepCode }), true, `keepCode ${keepCode}`));
+    ["true", 1, null].forEach(keepCode => assert.equal(settings({ keepCode }), false, `keepCode ${keepCode}`));
+});
+
 test("validGuesses checks count and every field", () => {
     assert.equal(validGuesses([guess(), guess(), guess()], 3), true);
     assert.equal(validGuesses([guess({ submitter: "Dan" }), guess({ map: "narva" }), guess({ submitter: null })], 3), true);
