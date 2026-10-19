@@ -405,6 +405,9 @@ export default class Multiplayer {
         case "left":
             this.toast("info", "mp.left", { name: msg.name });
             break;
+        case "unready":
+            this.toast("info", "mp.unready");
+            break;
         case "error":
             this.onError(msg.code);
             break;

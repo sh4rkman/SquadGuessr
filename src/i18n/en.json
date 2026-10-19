@@ -93,6 +93,7 @@
         },
         "confirmLeave": "Leave the lobby? You will need the code to come back.",
         "left": "{{name}} left the lobby",
+        "unready": "The host changed the settings: press READY again",
         "resume": {
             "lobby": "You are still in lobby {{code}}",
             "game": "Game {{code}} is still running · round {{round}}/{{total}}"

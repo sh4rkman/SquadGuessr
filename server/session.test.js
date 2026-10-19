@@ -897,6 +897,20 @@ test("guests mark themselves ready in the lobby; odd marks and marks outside the
     assert.deepEqual(all(guest, "error"), []);
 });
 
+test("changed settings take every ready back and tell those guests; the same settings again change nothing", () => {
+    const { s, host, guest, all, last } = withGuest();
+    const ida = { id: "ida" };
+    s.join(ida, { name: "Ida" });
+    s.handle(guest, { type: "lobbyReady", ready: true });
+    s.handle(host, { type: "settings", settings: CLASSIC });
+    assert.equal(last(host, "state").players.find(p => p.name === "Max").lobbyReady, true);
+    assert.deepEqual(all(guest, "unready"), []);
+    s.handle(host, { type: "settings", settings: { ...CLASSIC, rounds: 5 } });
+    assert.deepEqual(last(host, "state").players.map(p => [p.name, p.lobbyReady]), [["Hans", false], ["Max", false], ["Ida", false]]);
+    assert.equal(all(guest, "unready").length, 1);
+    assert.deepEqual(all(ida, "unready"), []);
+});
+
 test("every start counts down: 5 s when every connected guest is ready, otherwise 15 s", () => {
     const countdown = (prepare) => {
         const ctx = withGuest();

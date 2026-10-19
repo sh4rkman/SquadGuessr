@@ -166,8 +166,13 @@ export class Session {
 
     updateSettings(conn, settings) {
         if (this.phase !== "lobby" || !validSettings(settings)) return this.error(conn, "INVALID");
+        const before = JSON.stringify(this.settings);
         this.settings = pickSettings(settings);
+        // a ready was for the old settings: the guests confirm the new ones again
+        const unready = JSON.stringify(this.settings) === before ? [] : [...this.players.values()].filter(p => p.lobbyReady);
+        unready.forEach(p => { p.lobbyReady = false; });
         this.broadcastState();
+        unready.forEach(p => { if (p.conn) this.send(p.conn, { type: "unready" }); });
     }
 
     start(conn, guesses) {

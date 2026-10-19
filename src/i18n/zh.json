@@ -93,6 +93,7 @@
         },
         "confirmLeave": "确定离开房间吗？之后需要房间码才能重新加入。",
         "left": "{{name}} 离开了房间",
+        "unready": "房主更改了设置：请再次点击准备",
         "resume": {
             "lobby": "你仍在房间 {{code}} 中",
             "game": "游戏 {{code}} 仍在进行 · 第 {{round}}/{{total}} 轮"
