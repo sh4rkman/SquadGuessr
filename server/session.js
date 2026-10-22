@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { scoreAnswer, mapSize } from "../src/js/scoring.js";
-import { cleanName, validSettings, validGuesses, validAnswer } from "./validate.js";
+import { CHAT_MAX, CHAT_GAP_MS, CHAT_HISTORY } from "../src/js/chatLimits.js";
+import { cleanName, cleanText, validSettings, validGuesses, validAnswer } from "./validate.js";
 
 export const MAX_PLAYERS = 12;
 export const MAX_WATCHERS = 20;
@@ -12,6 +13,8 @@ export const LOAD_MS = 5 * 1000;
 // every start counts down so all devices load round 1 meanwhile; longer when not every guest is ready yet
 export const COUNTDOWN_READY_MS = 5 * 1000;
 export const COUNTDOWN_FORCED_MS = 15 * 1000;
+// how long whoever was kicked has to wait before they may join again
+export const KICK_WAIT_MS = 30 * 1000;
 // how long players back in the lobby wait for a host still on the results before one of them takes over
 export const HANDOVER_MS = 30 * 1000;
 
@@ -40,7 +43,12 @@ export class Session {
         this.startsAt = null;
         this.players = new Map();
         this.watchers = new Set();
-        this.kicked = new Set();
+        // who was kicked, until when: the device by its token, another device by the name ({ token, name, until })
+        this.kicked = [];
+        // the last CHAT_HISTORY lines: { id, name, text }
+        this.messages = [];
+        // how many of the newest messages were written in the running round: kept from whoever still guesses
+        this.roundLines = 0;
         this.lastActivity = now();
     }
 
@@ -48,7 +56,8 @@ export class Session {
 
     create(conn, { name, settings }) {
         const clean = cleanName(name);
-        if (!clean || !validSettings(settings)) return this.error(conn, "INVALID");
+        if (!clean) return this.error(conn, "NAME_INVALID");
+        if (!validSettings(settings)) return this.error(conn, "INVALID");
         this.settings = pickSettings(settings);
         const player = this.addPlayer(conn, clean);
         this.hostId = player.id;
@@ -58,12 +67,14 @@ export class Session {
     }
 
     join(conn, { name, token }) {
-        if (token && this.kicked.has(token)) return this.error(conn, "KICKED");
+        // the device first, whatever name it brings; the name only for a newcomer, a player coming back keeps theirs
+        if (token && this.refuseKicked(conn, k => k.token === token)) return false;
         const known = token ? this.findPlayer(p => p.token === token) : null;
         if (known) return this.reconnect(known, conn);
         if (!this.joinable()) return this.error(conn, "GAME_RUNNING");
         const clean = cleanName(name);
-        if (!clean) return this.error(conn, "INVALID");
+        if (!clean) return this.error(conn, "NAME_INVALID");
+        if (this.refuseKicked(conn, k => k.name === clean.toLowerCase())) return false;
         const same = this.findPlayer(p => p.name.toLowerCase() === clean.toLowerCase());
         if (same?.connected) return this.error(conn, "NAME_TAKEN");
         // someone who dropped out of the lobby may come back without their token (other device, other tab): same name, their place
@@ -73,6 +84,8 @@ export class Session {
         this.freshWait();
         if (same?.id === this.hostId) this.hostId = player.id;
         this.welcome(player);
+        // a player back under the same name never left the room for the others: they only saw them offline
+        if (!same) this.addLine({ system: "joined", name: player.name });
         this.broadcastState();
         // joined during the countdown: round 1's images to load
         this.sendPhase(conn);
@@ -119,6 +132,7 @@ export class Session {
         if (msg.type === "answer") return this.answer(player, msg);
         if (msg.type === "ready") return this.ready(player, msg.index);
         if (msg.type === "lobbyReady") return this.lobbyReady(player, msg.ready);
+        if (msg.type === "chat") return this.chat(player, msg.text);
         if (msg.type === "leave") return this.leave(player);
         // after a game everyone leaves their results on their own
         if (msg.type === "lobby") return this.toLobby(player);
@@ -138,7 +152,8 @@ export class Session {
     }
 
     /**
-     * Lobby only, and no ban: whoever is kicked can come back through the invite link, just not with their old token
+     * Lobby only, and no ban: whoever is kicked can come back through the invite link once KICK_WAIT_MS is over
+     * (another browser under another name gets in at once: without accounts nothing tells them apart)
      */
     kick(conn, playerId) {
         if (this.phase !== "lobby" || playerId === this.hostId) return this.error(conn, "INVALID");
@@ -146,8 +161,8 @@ export class Session {
         // already gone (double click, left at the same moment): nothing to do
         if (!player) return;
         // someone offline right now never gets the message: their reconnect with the old token is turned away instead
-        this.kicked.add(player.token);
-        this.error(player.conn, "KICKED");
+        this.kicked.push({ token: player.token, name: player.name.toLowerCase(), until: this.now() + KICK_WAIT_MS });
+        this.error(player.conn, "KICKED", { seconds: KICK_WAIT_MS / 1000 });
         this.leave(player);
     }
 
@@ -283,9 +298,53 @@ export class Session {
         this.broadcastState();
     }
 
+    /**
+     * A chat line for every player, watchers never see it (the big screen is often on a projector or a stream).
+     * During a round only between players whose answer is in: a line could give the answer away. Whoever still
+     * guesses is ignored silently (a line sent just as the round starts is normal) and gets the round's lines once
+     * they answer or the round ends. Too fast is an error: a real client waits the whole CHAT_GAP_MS and never gets it.
+     */
+    chat(player, text) {
+        if (!this.mayChat(player)) return;
+        // before the cleaning, the only part that costs: a flood of lines must not cost more than a comparison each.
+        // Half the client's pause: a line the network held up must not be turned away because the next came on time
+        if (this.now() - player.chatAt < CHAT_GAP_MS / 2) return this.error(player.conn, "CHAT_TOO_FAST");
+        const clean = cleanText(text, CHAT_MAX);
+        if (!clean) return;
+        player.chatAt = this.now();
+        this.addLine({ id: player.id, name: player.name, text: clean });
+    }
+
+    /**
+     * Into the history and out to every player who may read the chat: a player's line, or a notice ({ system, name })
+     * that someone came into, left or was kicked from the lobby, which keeps its place between the lines
+     */
+    addLine(line) {
+        // a new array: a welcome already handed out keeps the history it was sent with
+        this.messages = [...this.messages, line].slice(-CHAT_HISTORY);
+        if (this.phase === "round") this.roundLines++;
+        this.players.forEach(p => { if (p.conn && this.mayChat(p)) this.send(p.conn, { type: "chat", ...line }); });
+    }
+
+    /**
+     * Reads and writes the chat: always, except during a round before their answer is in (it cannot change after)
+     */
+    mayChat(player) {
+        return this.phase !== "round" || Boolean(player.answers[this.round]);
+    }
+
+    /**
+     * The running round's lines, for a player who could not read them while guessing
+     */
+    catchUp(player) {
+        if (!player.conn || this.roundLines === 0) return;
+        this.messages.slice(-this.roundLines).forEach(line => this.send(player.conn, { type: "chat", ...line }));
+    }
+
     startRound() {
         this.startsAt = null;
         this.phase = "round";
+        this.roundLines = 0;
         this.deadline = this.settings.timer > 0 ? this.now() + this.settings.timer * 1000 : null;
         this.broadcastState();
         this.broadcast(this.roundMsg());
@@ -304,6 +363,7 @@ export class Session {
             ? { lat: clamp(msg.lat, -size, 0), lng: clamp(msg.lng, 0, size), mapName: null }
             : { lat: null, lng: null, mapName: msg.mapName };
         player.answers[this.round] = { ...answer, ...scoreAnswer(this.settings.mode, this.guesses[this.round], answer) };
+        this.catchUp(player);
         this.broadcastState();
         this.checkRoundEnd();
     }
@@ -316,8 +376,11 @@ export class Session {
     leave(player) {
         if (this.phase === "lobby") {
             this.players.delete(player.id);
-            // a kick is the host's own doing (kick() bans the token before it gets here): no notice for that
-            if (!this.kicked.has(player.token)) this.broadcast({ type: "left", name: player.name });
+            // a kick is the host's own doing (kick() records the token before it gets here): no toast for that,
+            // only the chat says what happened
+            const kicked = this.kicked.some(k => k.token === player.token);
+            if (!kicked) this.broadcast({ type: "left", name: player.name });
+            this.addLine({ system: kicked ? "kicked" : "left", name: player.name });
         } else {
             player.conn = null;
             player.connected = false;
@@ -336,6 +399,7 @@ export class Session {
     }
 
     endRound() {
+        const guessing = [...this.players.values()].filter(p => !p.answers[this.round]);
         this.phase = "reveal";
         this.deadline = null;
         this.nextAt = this.settings.next ? this.now() + this.settings.next * 1000 : null;
@@ -345,6 +409,7 @@ export class Session {
         });
         this.broadcastState();
         this.broadcast(this.revealMsg());
+        guessing.forEach(p => this.catchUp(p));
     }
 
     next(conn) {
@@ -490,7 +555,7 @@ export class Session {
     // ===== HELPERS =====
 
     addPlayer(conn, name) {
-        const player = { id: randomUUID(), token: randomUUID(), name, conn, connected: true, awayUntil: 0, score: 0, answers: [], ready: -1, stalled: false, lobbyReady: false, backAt: this.now() };
+        const player = { id: randomUUID(), token: randomUUID(), name, conn, connected: true, awayUntil: 0, score: 0, answers: [], ready: -1, stalled: false, lobbyReady: false, backAt: this.now(), chatAt: -Infinity };
         this.players.set(player.id, player);
         return player;
     }
@@ -528,7 +593,8 @@ export class Session {
     }
 
     welcome(player) {
-        this.send(player.conn, { type: "welcome", playerId: player.id, token: player.token, code: this.code, isHost: player.id === this.hostId });
+        const chat = this.mayChat(player) ? this.messages : this.messages.slice(0, Math.max(0, this.messages.length - this.roundLines));
+        this.send(player.conn, { type: "welcome", playerId: player.id, token: player.token, code: this.code, isHost: player.id === this.hostId, chat });
     }
 
     resetScores() {
@@ -544,9 +610,21 @@ export class Session {
         this.watchers.forEach(conn => this.send(conn, msg));
     }
 
-    error(conn, code) {
-        if (conn) this.send(conn, { type: "error", code });
+    error(conn, code, details = {}) {
+        if (conn) this.send(conn, { type: "error", code, ...details });
         return false;
+    }
+
+    /**
+     * Turns away whoever matches a kick that is not over yet, telling them how long is left. True if turned away
+     */
+    refuseKicked(conn, match) {
+        const now = this.now();
+        // over is forgotten: the list never outgrows the kicks of the last KICK_WAIT_MS
+        this.kicked = this.kicked.filter(k => k.until > now);
+        const kick = this.kicked.find(match);
+        if (kick) this.error(conn, "KICKED", { seconds: Math.ceil((kick.until - now) / 1000) });
+        return Boolean(kick);
     }
 
     /**

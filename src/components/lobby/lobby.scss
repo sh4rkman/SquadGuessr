@@ -151,6 +151,8 @@
 #mpBanner[hidden],
 #mpStatus[hidden],
 #mpRanking[hidden],
+#mpChatPanel[hidden],
+#mpChatUnread[hidden],
 #BUTTON_MP_ENDROUND[hidden] {
     display: none !important;
 }
@@ -533,6 +535,214 @@ body.watch-mode.mp-reveal {
             // emoji fonts draw the glyph lower than the capitals beside it: lifted onto their middle
             translate: 0 -0.18em;
         }
+    }
+}
+
+// chat: lobby, between rounds and once the answer is in, players only (Multiplayer.renderChat). Sizes in rem: the footer shrinks its font on phones
+
+#mpChat {
+    // the button takes the footer's right corner
+    --footer: 8dvh;
+    display: none;
+}
+
+body.mp-chat #timerWrapper {
+    // the round timer ends in that corner too: it moves left of the button
+    margin-right: 3rem;
+}
+
+body.mp-chat #mpChat {
+    // no box of its own, so the footer's flex gap does not move the logos (button and panel are fixed anyway)
+    display: contents;
+}
+
+#BUTTON_MP_CHAT,
+#mpChatPanel {
+    position: fixed;
+    right: 1rem;
+    // under the toast (z-index 5 in the footer), so a warning is never hidden behind the open chat
+    z-index: 4;
+}
+
+#BUTTON_MP_CHAT {
+    bottom: calc(var(--footer) / 2);
+    translate: 0 50%;
+    // big enough for a finger, but never taller than the footer (phones would cut it off at the screen's edge)
+    min-width: 2.75rem;
+    height: min(2.75rem, calc(var(--footer) - 4px));
+    padding: 0 0.8rem;
+    font-size: 1.3rem;
+    border-radius: 999px;
+    background: #272727;
+    &:hover {
+        background: #333;
+    }
+    &[aria-expanded="true"] {
+        background: variables.$mainColor;
+    }
+}
+
+#mpChatUnread {
+    position: absolute;
+    top: -0.3rem;
+    right: -0.3rem;
+    min-width: 1.3rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    background: #a33;
+    font-size: 0.75rem;
+    line-height: 1.3rem;
+    letter-spacing: 0;
+}
+
+#mpChatPanel {
+    bottom: calc(var(--footer) + 0.5rem);
+    width: min(340px, calc(100vw - 2rem));
+    // grows with its lines up to this, then the log scrolls; dvh shrinks with the browser bars
+    max-height: 50dvh;
+    display: flex;
+    flex-direction: column;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 1rem;
+    text-align: left;
+    .mp-chat-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-left: 0.9rem;
+        border-bottom: 1px solid #333;
+        font-weight: bold;
+    }
+    // the close cross: none of the big global button look
+    #BUTTON_MP_CHAT_CLOSE {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        padding: 0;
+        font-size: 1rem;
+        background: none;
+    }
+    #mpChatLog {
+        list-style: none;
+        // the only part that gives way: head and input always stay visible
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        // scrolling to the end of the log does not scroll the page behind it
+        overscroll-behavior: contain;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
+        // one long word (a link) must not widen the panel
+        overflow-wrap: anywhere;
+        &:empty {
+            display: none;
+        }
+        strong {
+            margin-right: 0.4rem;
+            color: #8ab4f8;
+        }
+        .me strong {
+            color: variables.$newColorLight;
+        }
+        // someone came into, left or was kicked from the lobby: in the background of the talk
+        .notice {
+            color: #888;
+            font-style: italic;
+        }
+    }
+    form {
+        // at the bottom even while the log is empty (and hidden) in the full-height desktop panel
+        margin-top: auto;
+        padding: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+    #mpChatInput {
+        flex: 1;
+        min-width: 0;
+        padding: 0.6rem 0.8rem;
+        // 16 px or more: iOS zooms the whole page into a smaller input on focus
+        font-size: max(16px, 1rem);
+        text-align: left;
+        letter-spacing: normal;
+        background: #272727;
+        border: 2px solid #333;
+        border-radius: 10px;
+    }
+    // the send arrow: the global button colours, but as high as the input instead of the big global size
+    #BUTTON_MP_CHAT_SEND {
+        flex: none;
+        width: 2.75rem;
+        padding: 0;
+        border-radius: 10px;
+        svg {
+            display: block;
+            width: 1.3rem;
+            height: 1.3rem;
+            margin: auto;
+            fill: currentcolor;
+        }
+    }
+    // nothing typed yet: the arrow stays in the background (a click would send nothing anyway)
+    #mpChatInput:placeholder-shown + #BUTTON_MP_CHAT_SEND {
+        opacity: 0.4;
+    }
+}
+
+// phones: the footer is lower, and the open chat becomes a full-width sheet right above it
+@media (width <= 768px) {
+    #mpChat {
+        --footer: 6dvh;
+    }
+    #mpChatPanel {
+        left: 0;
+        right: 0;
+        bottom: var(--footer);
+        width: auto;
+        max-height: 45dvh;
+        border-width: 2px 0 0;
+        border-radius: 12px 12px 0 0;
+    }
+}
+
+// up to tablets the open chat covers the lower part of the room: READY, START and LEAVE can be scrolled up above it
+@media (width <= 1100px) {
+    body.mp-chat-open #lobby {
+        padding-bottom: 50dvh;
+    }
+}
+
+// wide screens: the open chat is a column of its own at the right edge, and nothing moves that does not have to
+@media (width > 1100px) {
+    body.mp-chat-open {
+        // room, game and results only make way where they would reach under it.
+        // The panel, its margin to the edge and a gap before the content:
+        --chat-space: calc(340px + 2rem);
+        // lobby and results keep their content (about 430px) in the middle: moved left only as far as it would reach
+        // under the chat, centred in what is left, so from about 1200px on it keeps its place
+        --chat-make-way: clamp(0px, calc(2 * var(--chat-space) + 440px - 100vw), var(--chat-space));
+    }
+    body.mp-chat-open #lobby {
+        padding-right: calc(1em + var(--chat-make-way));
+    }
+    body.mp-chat-open #results {
+        padding-right: calc(2em + var(--chat-make-way));
+    }
+    // the game (up to 1400px wide with 4em inside, index.scss and game.scss) keeps its left edge and only gets
+    // narrower on the right, just enough to end before the chat: NEXT and the ranking stay visible next to it
+    body.mp-chat-open #map_ui {
+        padding-right: max(0px, calc(var(--chat-space) - 4em + (min(1400px, 100vw) - 100vw) / 2));
+    }
+    // as high as main (index.scss)
+    #mpChatPanel {
+        height: calc(80dvh - 1rem);
+        max-height: none;
     }
 }
 

@@ -18,6 +18,23 @@
     
     </div>
 
+    <!-- multiplayer chat: lobby, between rounds and once the answer is in, for players only (Multiplayer.renderChat). In the footer so the toast stays on top of it -->
+    <div id="mpChat">
+        <div id="mpChatPanel" hidden>
+            <div class="mp-chat-head">
+                <span data-i18n="common:mp.chat.title"></span>
+                <button id="BUTTON_MP_CHAT_CLOSE" data-i18n-aria-label="common:mp.chat.close" data-i18n-title="common:mp.chat.close">✕</button>
+            </div>
+            <ol id="mpChatLog" role="log" aria-live="polite"></ol>
+            <form id="mpChatForm">
+                <!-- no autocomplete="off": Chrome on Android and its keyboards take it as "no suggestions, no autocorrect" -->
+                <input type="text" id="mpChatInput" enterkeyhint="send" data-i18n-placeholder="common:mp.chat.placeholder" />
+                <button type="submit" id="BUTTON_MP_CHAT_SEND" data-i18n-aria-label="common:mp.chat.send" data-i18n-title="common:mp.chat.send"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+            </form>
+        </div>
+        <button id="BUTTON_MP_CHAT" aria-expanded="false" aria-controls="mpChatPanel" data-i18n-aria-label="common:mp.chat.title" data-i18n-title="common:mp.chat.title">💬<span id="mpChatUnread" hidden></span></button>
+    </div>
+
 </footer>
 
 <section id="toast" class="info">

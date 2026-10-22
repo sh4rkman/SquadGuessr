@@ -7,10 +7,16 @@ import { copyText } from "./clipboard.js";
 import Preloader from "./preloader.js";
 import { findMap, basemapUrl } from "./data/maps.js";
 import { rankMoves } from "./scoring.js";
+import { CHAT_MAX, CHAT_GAP_MS, CHAT_HISTORY } from "./chatLimits.js";
 
 const RETRY_DELAYS = [1000, 2000, 5000];
 // NEXT / RESULTS stay locked until the server answers, or at most this long (e.g. the connection just dropped)
 const NEXT_UNLOCK_MS = 5000;
+// a held Enter clicks READY ~30 times a second: one toggle per this many ms keeps the client under the server's
+// message limit (server/index.js), which would otherwise cut it off
+const READY_GAP_MS = 300;
+// from here on the open chat would cover NEXT and the ranking at the reveal (lobby.scss docks it only above)
+const SMALL_SCREEN = "(max-width: 1100px)";
 
 /**
  * Multiplayer session client
@@ -46,6 +52,15 @@ export default class Multiplayer {
         this.resumeCheck = null;
         // the session the REJOIN hint on screen offers
         this.resumeCode = null;
+        // chat: panel open (remembered per device), lines from others that came in while it was closed, when the
+        // own last line went out (performance.now)
+        this.chatOpen = localStorage.getItem("mp:chatOpen") === "1";
+        this.unread = 0;
+        this.chatAt = -Infinity;
+        // when READY was last toggled (performance.now)
+        this.readyAt = -Infinity;
+        // the chat log stands at its newest line (kept up to date by its scroll events)
+        this.chatPinned = true;
     }
 
     init() {
@@ -71,7 +86,9 @@ export default class Multiplayer {
         $("#BUTTON_MP_START").on("click", () => this.start());
         $("#BUTTON_MP_READY").on("click", () => {
             const me = this.state?.players.find(p => p.id === this.me);
-            if (me) this.send({ type: "lobbyReady", ready: !me.lobbyReady });
+            if (!me || performance.now() - this.readyAt < READY_GAP_MS) return;
+            this.readyAt = performance.now();
+            this.send({ type: "lobbyReady", ready: !me.lobbyReady });
         });
         $("#BUTTON_MP_CANCEL").on("click", () => {
             // one click is enough: a second one would only arrive after the start is off (INVALID); renderLobbyButtons unlocks
@@ -90,6 +107,31 @@ export default class Multiplayer {
             if (!confirm(i18next.t(`mp.confirm.${action}`, { ns: "common", name, interpolation: { escapeValue: false } }))) return;
             if (action === "promote") this.gaveHost = true;
             this.send({ type: action, playerId: id });
+        });
+        $("#BUTTON_MP_CHAT").on("click", () => this.toggleChat(!this.chatOpen));
+        $("#BUTTON_MP_CHAT_CLOSE").on("click", () => this.toggleChat(false));
+        $("#mpChat").on("keydown", (e) => { if (e.key === "Escape") this.toggleChat(false); });
+        // the footer blocks the context menu: in the chat it is needed to paste, and on phones to select text
+        $("#mpChat").on("contextmenu", (e) => e.stopPropagation());
+        // a tap on the send arrow would take the focus from the input: the phone's keyboard would close after every line
+        $("#BUTTON_MP_CHAT_SEND").on("mousedown", (e) => e.preventDefault());
+        const log = document.getElementById("mpChatLog");
+        log.addEventListener("scroll", () => { this.chatPinned = log.scrollHeight - log.scrollTop - log.clientHeight < 40; });
+        // a new size (a turned tablet, the chat docking or not) leaves the scroll position behind: whoever was at the
+        // newest line stays there, whoever scrolled up to read stays where they are
+        new ResizeObserver(() => { if (this.chatPinned) log.scrollTop = log.scrollHeight; }).observe(log);
+        // UTF-16 units, never more than the server keeps (CHAT_MAX characters as seen)
+        $("#mpChatInput").attr("maxlength", CHAT_MAX);
+        $("#mpChatForm").on("submit", (e) => {
+            e.preventDefault();
+            const text = $("#mpChatInput").val().trim();
+            // offline (the banner says reconnecting): the text stays for another try
+            if (!text || this.ws?.readyState !== WebSocket.OPEN) return;
+            // too soon after the last line: it stays in the field, nothing goes out
+            if (performance.now() - this.chatAt < CHAT_GAP_MS) return this.toast("warning", "mp.errors.CHAT_TOO_FAST");
+            this.chatAt = performance.now();
+            this.send({ type: "chat", text });
+            $("#mpChatInput").val("");
         });
         $(".mp-resume-join").on("click", () => {
             // the token gets us back in: a name field emptied in the entry form must not block that
@@ -313,6 +355,9 @@ export default class Multiplayer {
         this.answered = false;
         this.roundIndex = null;
         this.revealIndex = null;
+        this.unread = 0;
+        $("#mpChatLog").empty();
+        $("#mpChatInput").val("");
         this.gaveHost = false;
         // the game screen is gone: a round seen again later (watching this session after leaving it) must count as fresh
         this.app.currentGuess = null;
@@ -323,7 +368,7 @@ export default class Multiplayer {
         this.state = null;
         this.me = null;
         this.code = null;
-        $("body").removeClass("mp-active mp-host watch-mode mp-reveal");
+        $("body").removeClass("mp-active mp-host watch-mode mp-reveal mp-chat mp-chat-open");
         $("#mpBanner, #mpStatus, #mpRanking, #BUTTON_MP_ENDROUND").prop("hidden", true);
         this.app.INPUT_GUESS.prop("disabled", false);
     }
@@ -378,6 +423,12 @@ export default class Multiplayer {
             history.replaceState({}, "", `/?join=${msg.code}`);
             // a new connection has nothing in flight: a CANCEL lost with the old one can be clicked again
             $("#BUTTON_MP_CANCEL").prop("disabled", false);
+            // the history replaces what is on screen: after a reload or a dropped connection nothing shows twice,
+            // and it starts at its newest line
+            $("#mpChatLog").empty();
+            this.chatPinned = true;
+            // an older server sends no history
+            (msg.chat ?? []).forEach(line => this.addChatLine(line));
             break;
         case "state":
             // like welcome for a player: only once the server took the code does the page turn into the big screen and
@@ -402,16 +453,19 @@ export default class Multiplayer {
         case "final":
             this.onFinal(msg);
             break;
+        case "chat":
+            this.onChat(msg);
+            break;
         case "left":
             this.toast("info", "mp.left", { name: msg.name });
             break;
         case "error":
-            this.onError(msg.code);
+            this.onError(msg.code, msg);
             break;
         }
     }
 
-    onError(code) {
+    onError(code, details) {
         // a rejected start brings no new state, so the START spinner would stay
         if (this.state?.phase === "lobby" && !this.guessFetch) this.renderLobbyButtons(this.state, false);
         if (code === "GAME_RUNNING") {
@@ -427,17 +481,24 @@ export default class Multiplayer {
             this.app.toMenu();
             return this.toast("warning", "mp.errors.REPLACED");
         }
+        if (code === "KICKED") {
+            // the stored token stays: the server knows this device again and lets it back in once the wait is over
+            this.stop();
+            this.app.toMenu();
+            return this.toast("error", "mp.errors.KICKED", { seconds: details.seconds });
+        }
         this.toast("error", `mp.errors.${code}`);
         // a stored token that did not get us back in (dead session, or it expired and the name is taken now) is useless
         if (code === "SESSION_NOT_FOUND" || code === "NAME_TAKEN") this.forget(this.hello?.code);
-        const rejected = ["SESSION_NOT_FOUND", "NAME_TAKEN", "SESSION_FULL", "SERVER_BUSY", "KICKED"].includes(code);
+        const rejected = ["SESSION_NOT_FOUND", "NAME_TAKEN", "NAME_INVALID", "SESSION_FULL", "SERVER_BUSY"].includes(code);
         if (!rejected) return;
         // back to the menu: were in the session (server restart, dropped from the lobby), a big-screen link, or an invite
         // link whose form cannot fix it (dead or full session; the form only lets you change the name)
         const invite = $("#mpEntry").hasClass("invite");
         const watchLink = Boolean(new URLSearchParams(location.search).get("watch"));
-        if (this.state || watchLink || (invite && code !== "NAME_TAKEN")) return this.leave();
-        // wrong code (to play or to watch) or taken name: stay on the form to correct it
+        const nameProblem = code === "NAME_TAKEN" || code === "NAME_INVALID";
+        if (this.state || watchLink || (invite && !nameProblem)) return this.leave();
+        // wrong code (to play or to watch), taken or unusable name: stay on the form to correct it
         // (an automatic rejoin after a reload never showed the form, hence showEntry)
         this.stop();
         this.showEntry();
@@ -484,6 +545,7 @@ export default class Multiplayer {
         if (me) $("#totalPoints").text(me.score);
 
         this.renderStatus();
+        this.renderChat();
         if (s.phase === "lobby") {
             // a start that was called off leaves nothing loading or retrying behind
             this.preloader.keep([]);
@@ -713,6 +775,12 @@ export default class Multiplayer {
         if (msg.index === this.revealIndex && app.currentGuess?.url === solution.url) return;
         this.revealIndex = msg.index;
         this.lastReveal = msg;
+        // small screens: a chat opened once the answer was in would cover the ranking, so the reveal closes it
+        // (only for now, like the round does)
+        if (matchMedia(SMALL_SCREEN).matches) {
+            this.chatOpen = false;
+            this.renderChat();
+        }
 
         clearInterval(this.countdown);
         app.stopTimer();
@@ -910,6 +978,70 @@ export default class Multiplayer {
                 )
                 .appendTo($list);
         });
+    }
+
+    // ===== CHAT =====
+
+    onChat(line) {
+        this.addChatLine(line);
+        // someone coming or going is no reason to open the chat
+        if (!line.system && line.id !== this.me && !this.chatOpen) this.unread++;
+        this.renderChat();
+    }
+
+    addChatLine({ id, name, text, system }) {
+        const log = document.getElementById("mpChatLog");
+        // as text, never HTML: names and lines come from other players. Each with its own direction (dir isolates it):
+        // a right-to-left name must not pull the line's start in front of it and so fake who wrote what
+        if (system) {
+            // someone came into, left or was kicked from the lobby: one quiet sentence, the name isolated inside it (FSI … PDI).
+            // Unescaped, .text() keeps it from being HTML
+            const notice = i18next.t(`mp.${system}`, { ns: "common", name: `\u2068${name}\u2069`, interpolation: { escapeValue: false } });
+            $("<li class=\"notice\">").text(notice).appendTo(log);
+        } else {
+            $("<li>")
+                .toggleClass("me", id === this.me)
+                .append($("<strong dir=\"auto\">").text(name), $("<span dir=\"auto\">").text(text))
+                .appendTo(log);
+        }
+        $(log).children().slice(0, -CHAT_HISTORY).remove();
+        // follows new lines only from the bottom: whoever scrolled up to read stays there, unless they write themselves
+        if (this.chatPinned || id === this.me) log.scrollTop = log.scrollHeight;
+    }
+
+    /**
+     * The chat is for players: in the lobby, between rounds, and in a round once their answer is in (the server sends
+     * nobody who still guesses a line of it); never on the big screen
+     */
+    renderChat() {
+        const me = this.state?.players.find(p => p.id === this.me);
+        const shown = Boolean(me) && !this.watching && (this.state.phase !== "round" || me.answered);
+        // small screens: left open, the chat would cover the map, so a round closes it until the answer is in (and the
+        // reveal again, see onReveal; only for now: the remembered choice still opens it in the next lobby after a reload)
+        if (!shown && this.state?.phase === "round" && matchMedia(SMALL_SCREEN).matches) this.chatOpen = false;
+        const wasVisible = $("#mpChatPanel").is(":visible");
+        const docked = $("body").hasClass("mp-chat-open");
+        $("body").toggleClass("mp-chat", shown).toggleClass("mp-chat-open", shown && this.chatOpen);
+        // docked on wide screens, the chat takes its room from the game (also when it opens with the answer): the map
+        // has to learn its new size
+        if (docked !== $("body").hasClass("mp-chat-open") && $("#map_ui").is(":visible")) this.app.minimap.invalidateSize();
+        $("#mpChatPanel").prop("hidden", !this.chatOpen);
+        $("#BUTTON_MP_CHAT").attr("aria-expanded", String(this.chatOpen));
+        $("#mpChatUnread").text(this.unread > 9 ? "9+" : this.unread).prop("hidden", this.unread === 0);
+        // a hidden log has no height to scroll: once it shows (opened, after a reload, after a round) it starts at the newest line
+        const log = document.getElementById("mpChatLog");
+        if (!wasVisible && $("#mpChatPanel").is(":visible")) log.scrollTop = log.scrollHeight;
+    }
+
+    toggleChat(open) {
+        this.chatOpen = open;
+        localStorage.setItem("mp:chatOpen", open ? "1" : "0");
+        if (open) this.unread = 0;
+        // the keyboard focus goes back to the button instead of getting lost in the closed panel
+        if (!open && document.getElementById("mpChatPanel").contains(document.activeElement)) $("#BUTTON_MP_CHAT").trigger("focus");
+        this.renderChat();
+        // touch screens would pull up their keyboard over half the screen just for reading
+        if (open && matchMedia("(pointer: fine)").matches) $("#mpChatInput").trigger("focus");
     }
 
     describeSettings({ mode, timer, rounds, next }) {

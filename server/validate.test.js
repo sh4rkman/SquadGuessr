@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cleanName, validSettings, validGuesses, validAnswer } from "./validate.js";
+import { cleanName, cleanText, validSettings, validGuesses, validAnswer } from "./validate.js";
 
 const guess = (over = {}) => ({ map: "Narva", url: "/img/guesses/narva_1.webp", lat: 1.5, lng: -2, ...over });
 
@@ -8,7 +8,6 @@ test("cleanName trims, strips control chars and caps length", () => {
     assert.equal(cleanName("  Max "), "Max");
     assert.equal(cleanName(" max\u0007"), "max");
     assert.equal(cleanName("x".repeat(30)), "x".repeat(20));
-    assert.equal(cleanName("<b>Hi</b>"), "<b>Hi</b>");
     assert.equal(cleanName("   "), null);
     assert.equal(cleanName(42), null);
     assert.equal(cleanName(undefined), null);
@@ -23,9 +22,81 @@ test("cleanName removes invisible characters and collapses inner whitespace", ()
     assert.equal(cleanName("\u200b\u200b"), null);
 });
 
-test("cleanName never splits an emoji when truncating", () => {
-    assert.equal(cleanName("ABCDEFGHIJKLMNOPQRS😀"), "ABCDEFGHIJKLMNOPQRS😀");
-    assert.equal(cleanName("ABCDEFGHIJKLMNOPQRST😀"), "ABCDEFGHIJKLMNOPQRST");
+test("cleanName counts characters as seen when truncating: a vowel sign stays with its letter", () => {
+    assert.equal(cleanName("ABCDEFGHIJKLMNOPQRSễ"), "ABCDEFGHIJKLMNOPQRSễ");
+    assert.equal(cleanName("x".repeat(18) + "राहुल"), "x".repeat(18) + "राहु");
+});
+
+test("names keep letters of every script, digits, spaces and - _ . ' only", () => {
+    for (const name of ["Jörg", "Łukasz", "Nguyễn", "राहुल", "李明", "Ana-Lena", "O'Brien", "Max_99", "J.R. Smith"]) {
+        assert.equal(cleanName(name), name);
+    }
+    assert.equal(cleanName("🐺Wolf"), "Wolf");
+    assert.equal(cleanName("<b>Hi</b>"), "bHib");
+    assert.equal(cleanName("Max!?"), "Max");
+});
+
+test("names drop whatever draws nothing, so a look-alike is the same name", () => {
+    assert.equal(cleanName("Hans\u034f"), "Hans");
+    assert.equal(cleanName("Ha\ufe0fns"), "Hans");
+    assert.equal(cleanName("\u3164Hans\u17b4"), "Hans");
+    assert.equal(cleanName("Hans\u{E0041}"), "Hans");
+});
+
+test("a name needs a letter or a digit", () => {
+    for (const name of ["🐺🐺", "---", "_ . '", "\u034f", "♥"]) assert.equal(cleanName(name), null, name);
+});
+
+test("cleanText turns line breaks and tabs into spaces instead of gluing the words", () => {
+    assert.equal(cleanText("line1\nline2\r\nline3\tTab", 200), "line1 line2 line3 Tab");
+    assert.equal(cleanName("Max\tMüller"), "Max Müller");
+});
+
+test("cleanText cleans like a name but cuts at its own length", () => {
+    assert.equal(cleanText("  hello\u200b  world ", 200), "hello world");
+    assert.equal(cleanText("x".repeat(300), 200), "x".repeat(200));
+    assert.equal(cleanText("   ", 200), null);
+    assert.equal(cleanText(null, 200), null);
+});
+
+test("cleanText drops letters that draw nothing: no invisible names or lines", () => {
+    assert.equal(cleanName("\u3164"), null);
+    assert.equal(cleanName("\u2800 \uffa0 \u115f\u1160"), null);
+    assert.equal(cleanText("Bob\u3164", 200), "Bob");
+});
+
+test("cleanText keeps accents but cuts piles of combining marks (Zalgo text) down to four", () => {
+    assert.equal(cleanText("H" + "\u0336".repeat(60) + "i", 200), "H" + "\u0336".repeat(4) + "i");
+    assert.equal(cleanText("Ça va? Tiếng Việt", 200), "Ça va? Tiếng Việt");
+});
+
+test("cleanText looks at no more of a huge text than could ever show: 4 × max raw characters", () => {
+    assert.equal(cleanText(" ".repeat(800) + "x", 200), null);
+    assert.equal(cleanText(" ".repeat(799) + "x", 200), "x");
+});
+
+test("cleanText keeps the joiners that emoji and many scripts need; names drop them (no second, identical looking Hans)", () => {
+    assert.equal(cleanText("👨‍👩‍👧 🏳️‍🌈", 200), "👨‍👩‍👧 🏳️‍🌈");
+    assert.equal(cleanText("می‌خواهم", 200), "می‌خواهم");
+    assert.equal(cleanName("Ha\u200dns"), "Hans");
+    assert.equal(cleanName("Ha\u200cns"), "Hans");
+});
+
+test("cleanText wants something to see: marks, joiners and selectors alone are nothing", () => {
+    assert.equal(cleanName("\ufe0f\ufe0f\ufe0f\ufe0f"), null);
+    assert.equal(cleanName("\u034f"), null);
+    assert.equal(cleanName("\u17b4\u17b5"), null);
+    assert.equal(cleanText("\u200d\u200c", 200), null);
+    assert.equal(cleanText("\u2764\ufe0f", 200), "\u2764\ufe0f");
+});
+
+test("cleanText counts characters as seen: a flag, a skin tone or a family is one and never cut in half", () => {
+    assert.equal(cleanText("x".repeat(199) + "🇩🇪", 200), "x".repeat(199) + "🇩🇪");
+    assert.equal(cleanText("x".repeat(200) + "🇩🇪", 200), "x".repeat(200));
+    assert.equal(cleanText("👍🏽👍🏽👍🏽xxxxxxxxxx", 4), "👍🏽👍🏽👍🏽x");
+    // the raw limit (4 × max) cuts into the 100th family: that one is dropped, not shown in pieces
+    const family = "👨‍👩‍👧";
+    assert.equal(cleanText("x" + family.repeat(150), 200), "x" + family.repeat(99));
 });
 
 test("validSettings accepts only allowed values", () => {

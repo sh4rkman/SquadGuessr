@@ -10,11 +10,16 @@ const HEARTBEAT_MS = 30 * 1000;
 const MAX_SESSIONS = 1000;
 // far above any burst a real client needs; a client that stops reading must not make us queue replies forever
 const MAX_BUFFERED = 64 * 1024;
+// a real client sends a few messages a second at most, each one a click or an event (ready, answer, a chat line):
+// a connection may send MSG_BURST at once and MSG_PER_S more every second. Whoever goes beyond is cut off before one
+// more of their messages is read; a real client recovers from that best, it reconnects and gets the whole state again
+export const MSG_BURST = 20;
+export const MSG_PER_S = 5;
 
 /**
  * Multiplayer session server: routes socket messages to Session instances
  */
-export function startServer({ port = 3001, idleMs = IDLE_MS, maxSessions = MAX_SESSIONS } = {}) {
+export function startServer({ port = 3001, idleMs = IDLE_MS, maxSessions = MAX_SESSIONS, msgBurst = MSG_BURST, msgPerSecond = MSG_PER_S } = {}) {
     const wss = new WebSocketServer({ port, path: "/mp", maxPayload: 64 * 1024 });
     const sessions = new Map();
     const sessionOf = new WeakMap();
@@ -74,10 +79,24 @@ export function startServer({ port = 3001, idleMs = IDLE_MS, maxSessions = MAX_S
         session.handle(ws, msg);
     };
 
+    // token bucket: refilled by the time since the last frame, so it costs nothing while a connection is quiet.
+    // A monotonic clock: the system clock may step back (NTP, a VM waking up), and a negative pause would cut off everyone
+    const allowed = (ws) => {
+        const now = performance.now();
+        ws.allowance = Math.min(msgBurst, ws.allowance + (now - ws.lastFrame) * msgPerSecond / 1000);
+        ws.lastFrame = now;
+        if (ws.allowance < 1) return false;
+        ws.allowance--;
+        return true;
+    };
+
     wss.on("connection", (ws) => {
         ws.isAlive = true;
+        ws.allowance = msgBurst;
+        ws.lastFrame = performance.now();
         ws.on("pong", () => { ws.isAlive = true; });
         ws.on("message", (data) => {
+            if (!allowed(ws)) return ws.terminate();
             let msg;
             try {
                 msg = JSON.parse(data);

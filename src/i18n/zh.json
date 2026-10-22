@@ -83,6 +83,12 @@
         "up": "排名上升",
         "down": "排名下降",
         "kick": "移除 {{name}}",
+        "chat": {
+            "title": "聊天",
+            "close": "关闭聊天",
+            "placeholder": "输入消息…",
+            "send": "发送"
+        },
         "onResults": "仍在查看结果",
         "makeHost": "将 {{name}} 设为房主",
         "nowHost": "你现在是房主",
@@ -92,6 +98,8 @@
             "promote": "将 {{name}} 设为房主？之后你将成为普通玩家。"
         },
         "confirmLeave": "确定离开房间吗？之后需要房间码才能重新加入。",
+        "joined": "{{name}} 加入了房间",
+        "kicked": "{{name}} 被移出了房间",
         "left": "{{name}} 离开了房间",
         "resume": {
             "lobby": "你仍在房间 {{code}} 中",
@@ -112,6 +120,7 @@
         "errors": {
             "SESSION_NOT_FOUND": "未找到该房间",
             "NAME_TAKEN": "该名字已被使用",
+            "NAME_INVALID": "名字只能包含字母、数字以及 - _ . '",
             "GAME_RUNNING": "游戏已经开始",
             "SESSION_FULL": "房间已满",
             "NOT_HOST": "只有房主可以这样做",
@@ -121,7 +130,8 @@
             "SERVER_BUSY": "当前房间数过多，请稍后再试",
             "REPLACED": "你已在其他标签页或设备上继续游戏",
             "NO_PLAYERS": "至少需要另一名玩家加入",
-            "KICKED": "房主已将你移出房间"
+            "KICKED": "房主已将你移出房间，{{seconds}} 秒后可重新加入",
+            "CHAT_TOO_FAST": "发送太快，请稍等"
         }
     },
     "submit": {
