@@ -10,24 +10,19 @@
       <img src="https://img.shields.io/badge/Discord-111?style=for-the-badge&logo=discord&logoColor=white" alt="discord"></a>
 </div>
 
+# Submit a new guess
 
-</br>
-</br>
+1. Turn on Squad's **screenshot mode** first, so the compass is not in your screenshot: click the eye icon at the bottom of the screen in the main menu.
 
-# Submit a new guess 
+   For a free camera, start Squad's Firing Range (training mode), open the console and load the map you want with `AdminChangeLayer <layer>`, e.g. `AdminChangeLayer Narva_AAS_v1`. You are admin there, so **Shift+P** switches to the admin camera and you can fly anywhere on the map.
 
-</br>
+2. Take a full screenshot ingame. Any screenshot tool works: you choose the part to show later in SquadGuessr, which also scales it to the right size. The easiest is Steam's own: press **F12** (Steam's default key), watch your screenshots in Steam and copy the one you want to the clipboard, ready to paste with Ctrl+V in **step 4**. Please consider taking your screenshots at quite high graphics settings for best UX on SquadGuessr.
 
-1. Take your screenshot ingame (go into "screenshot mode" by clicking the eye icon at bottom of screen in main menu to remove compass, and Shift+P ingame for free camera). Its shorter side must be **at least 900px**. Please consider taking your screenshots at quite high graphics settings for best UX on squadguessr.
-Using a screenshot tool like [GreenShot](https://getgreenshot.org/)/[ShareX](https://getsharex.com/) helps a lot.
+3. Open SquadGuessr, click **SUBMIT A GUESS** in the menu and then **SUBMIT** (or go to `/?submit`).
 
-2. Open SquadGuessr, click **SUBMIT A GUESS** in the menu and then **SUBMIT** (or go to `/?submit`).
+4. Choose the map, paste your screenshot with Ctrl+V (or drop/choose the file), drag the square onto the part you want to show and click on the map where the screenshot was taken. Click **ADD** and repeat for more screenshots. Click a guess in the list to correct it, then **SAVE**.
 
-3. Choose the map, paste your screenshot with Ctrl+V (or drop/choose the file), drag the square onto the part you want to show and click on the map where the screenshot was taken. Click **ADD** and repeat for more screenshots. Click a guess in the list to correct it, then **SAVE**.
-
-4. Click **DOWNLOAD ZIP** and upload the ZIP on [Discord](https://discord.gg/BNPAc5kEJP) (suggestion channel).
-
-</br>
+5. Click **DOWNLOAD ZIP** and upload the ZIP on [Discord](https://discord.gg/BNPAc5kEJP) (suggestion channel).
 
 ## Reviewing submissions
 
@@ -44,7 +39,6 @@ Click **SUBMIT A GUESS** → **REVIEW** in the menu (or go to `/?review`), drop 
 }
 ```
 
-</br></br></br>
 # Multiplayer server
 
 Group sessions ("Play with friends") need the small WebSocket server in `server/`.
@@ -80,11 +74,7 @@ Sessions live in memory only; `docker compose up -d --build` after an update res
 Guesses and images come from the public API at `https://squadguessr.app/api/`.
 Building the frontend outside Docker needs Node ≥ 20.9 (required by `copy-webpack-plugin`); the server and `npm test` run on Node 18.
 
-</br></br>
-
 # **Support the project**
-</br>
-
 [![buy me a coffee](https://img.shields.io/badge/BUY%20ME%20A%20COFFEE-b12222?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/sharkman)  
 
 

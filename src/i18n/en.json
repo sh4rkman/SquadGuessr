@@ -127,7 +127,15 @@
     "submit": {
         "open": "SUBMIT A GUESS",
         "title": "Submit a guess",
-        "steps": "Choose the map, paste your screenshot, drag the square onto the best part, then click on the map where the screenshot was taken.",
+        "guide": {
+            "title": "How to submit",
+            "screenshotMode": "Turn on Squad's screenshot mode first (eye icon at the bottom of the main menu), so the compass is not in your screenshot.",
+            "freeCamera": "Free camera: start Squad's Firing Range, open the console, load a map with AdminChangeLayer <layer> and press Shift+P for the admin camera.",
+            "screenshot": "Take a full screenshot, e.g. with Steam (F12), and copy it to the clipboard in Steam's screenshot manager.",
+            "submit": "Choose the map, paste the screenshot here (Ctrl+V), drag the square onto the best part and click on the map where it was taken. Then click ADD.",
+            "upload": "Click DOWNLOAD ZIP and upload the ZIP in the suggestions channel on",
+            "dots": "Dots on the map show spots that already have a guess in the game. Screenshots from places without dots help the most."
+        },
         "namePlaceholder": "Your name (optional)",
         "chooseMap": "Choose a map…",
         "pasteHint": "Paste a screenshot (Ctrl+V), drop it here or click to choose a file",

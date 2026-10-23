@@ -37,9 +37,34 @@
     }
 }
 
-.submit-steps {
+.submit-guide {
     max-width: 700px;
-    opacity: 0.7;
+    summary {
+        cursor: pointer;
+        opacity: 0.7;
+    }
+    // until opened once: newcomers should notice it (pulse comes from results.scss)
+    &.unseen summary {
+        opacity: 1;
+        color: variables.$newColorLight;
+        font-weight: bold;
+        animation: pulse 1.5s infinite;
+    }
+    ol {
+        margin-top: 0.5em;
+        padding-left: 1.5em;
+    }
+    ol, p {
+        text-align: left;
+        opacity: 0.7;
+    }
+    li + li {
+        margin-top: 0.4em;
+    }
+    // where the ZIP goes: the one link in the guide, it must not fade into the dimmed list
+    a {
+        color: variables.$newColorLight;
+    }
 }
 
 .submit-fields {

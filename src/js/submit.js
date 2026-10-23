@@ -58,6 +58,13 @@ export default class Submit {
         });
         this.setupImageArea();
 
+        // the guide stays highlighted until it was opened once
+        const guide = $(".submit-guide").toggleClass("unseen", !localStorage.getItem("submit:guideSeen"));
+        guide.on("toggle", () => {
+            localStorage.setItem("submit:guideSeen", "1");
+            guide.removeClass("unseen");
+        });
+
         document.addEventListener("paste", (e) => {
             if (!$("#submit").is(":visible")) return;
             const file = Array.from(e.clipboardData?.files ?? []).find(f => f.type.startsWith("image/"));

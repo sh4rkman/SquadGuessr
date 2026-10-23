@@ -127,7 +127,15 @@
     "submit": {
         "open": "提交截图",
         "title": "提交猜测图",
-        "steps": "选择地图，粘贴截图，把方框拖到最合适的位置，然后在地图上点击截图的拍摄位置。",
+        "guide": {
+            "title": "如何提交",
+            "screenshotMode": "请先开启 Squad 的截图模式（主菜单底部的眼睛图标），这样截图中就不会出现指南针。",
+            "freeCamera": "自由视角：进入 Squad 的靶场（Firing Range），打开控制台，用 AdminChangeLayer <layer> 加载地图，然后按 Shift+P 切换到管理员摄像机。",
+            "screenshot": "截取完整截图，例如用 Steam（F12），然后在 Steam 的截图管理器中复制到剪贴板。",
+            "submit": "选择地图，在此粘贴截图（Ctrl+V），把方框拖到最合适的位置，然后在地图上点击截图的拍摄位置。最后点击“添加”。",
+            "upload": "点击“下载 ZIP”，然后将 ZIP 文件上传到以下平台的 suggestions 频道：",
+            "dots": "地图上的圆点表示游戏中已有猜测图的位置。没有圆点的地方的截图最有帮助。"
+        },
         "namePlaceholder": "你的名字（可选）",
         "chooseMap": "选择地图…",
         "pasteHint": "粘贴截图（Ctrl+V）、拖放到此处或点击选择文件",
