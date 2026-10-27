@@ -124,6 +124,23 @@ test("validSettings: keepCode is a boolean, and an older cached client sends non
     ["true", 1, null].forEach(keepCode => assert.equal(settings({ keepCode }), false, `keepCode ${keepCode}`));
 });
 
+test("validSettings: team play takes Sum with 2–10 teams and minus points on or off, in classic only", () => {
+    const settings = (over) => validSettings({ mode: "classic", timer: 0, rounds: 5, ...over });
+    assert.equal(settings({ team: "off" }), true);
+    assert.equal(settings({ team: "sum", teams: 2, penalty: false }), true);
+    assert.equal(settings({ team: "sum", teams: 10, penalty: true }), true);
+    [1, 11, 2.5, "2", null].forEach(teams => assert.equal(settings({ team: "sum", teams, penalty: false }), false, `teams ${teams}`));
+    ["yes", 1, null].forEach(penalty => assert.equal(settings({ team: "sum", teams: 2, penalty }), false, `penalty ${penalty}`));
+    assert.equal(settings({ team: "solo" }), false);
+    // Sum was called Average once: no client sends that any more
+    assert.equal(settings({ team: "average" }), false);
+    // a team guesses points on the map: never in Find the Map
+    assert.equal(validSettings({ mode: "mapFinder", timer: 0, rounds: 5, team: "sum", teams: 2, penalty: false }), false);
+    assert.equal(validSettings({ mode: "mapFinder", timer: 0, rounds: 5, team: "off" }), true);
+    // an older cached client knows nothing of teams
+    assert.equal(settings({}), true);
+});
+
 test("validGuesses checks count and every field", () => {
     assert.equal(validGuesses([guess(), guess(), guess()], 3), true);
     assert.equal(validGuesses([guess({ submitter: "Dan" }), guess({ map: "narva" }), guess({ submitter: null })], 3), true);
@@ -160,4 +177,16 @@ test("validAnswer per mode", () => {
     assert.equal(validAnswer({ mapName: "narva" }, "mapFinder"), true);
     assert.equal(validAnswer({ mapName: "x".repeat(41) }, "mapFinder"), false);
     assert.equal(validAnswer({ lat: 1, lng: 2 }, "mapFinder"), false);
+});
+
+test("validSettings: team play also takes Midpoint", () => {
+    assert.equal(validSettings({ mode: "classic", timer: 0, rounds: 5, team: "centroid", teams: 3, penalty: false }), true);
+    assert.equal(validSettings({ mode: "mapFinder", timer: 0, rounds: 5, team: "centroid", teams: 3, penalty: false }), false);
+});
+
+test("validSettings: team play also takes Leader, whose leaders get 10–60 s to decide", () => {
+    const settings = (over) => validSettings({ mode: "classic", timer: 0, rounds: 5, team: "leader", teams: 2, penalty: false, ...over });
+    [10, 15, 20, 30, 45, 60].forEach(decide => assert.equal(settings({ decide }), true, `decide ${decide}`));
+    [0, 5, 25, 90, "20", null].forEach(decide => assert.equal(settings({ decide }), false, `decide ${decide}`));
+    assert.equal(settings({}), true);
 });

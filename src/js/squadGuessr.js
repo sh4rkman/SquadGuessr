@@ -550,8 +550,9 @@ export default class SquadGuessr {
     updateTimerDisplay(seconds) {
         // warnings only while the guess is still missing: a sent multiplayer answer just waits for the others
         // (singleplayer stops the timer on the guess), a placed marker counts when the time runs out. Find the Map has
-        // no marker: its typed name counts too, but half typed it scores 0, so the warnings stay
-        const open = !this.mp.answered && !this.minimap.guessMarker;
+        // no marker: its typed name counts too, but half typed it scores 0, so the warnings stay. In multiplayer the
+        // choice may also be a leader's pick (team play), which the session knows
+        const open = this.mp.active ? this.mp.stillToChoose() : !this.minimap.guessMarker;
         const critical = open && seconds > 0 && seconds <= 5;
         $("#totalSeconds").html(seconds);
         $("#timerWrapper").toggleClass("warn", open && seconds <= 10).toggleClass("critical", open && seconds <= 5);

@@ -193,10 +193,16 @@
         &.ready {
             background: variables.$newColor;
         }
+        // Leader: gold like the ⭐ in front of the name, readable on the dark chip and on a ready one's green
+        &.leader {
+            color: #fde047;
+            font-weight: 600;
+        }
     }
     // host's promote and kick icons inside a lobby chip: none of the big global button look
     .mp-promote,
-    .mp-kick {
+    .mp-kick,
+    .mp-lead {
         font-size: 1em;
         padding: 0 0 0 0.5em;
         &,
@@ -249,6 +255,15 @@
     }
     .down {
         color: #e66;
+    }
+    .points.negative {
+        color: #e66;
+    }
+    // team play's final: who played in the team, on a line of its own
+    .members {
+        grid-column: 1 / -1;
+        font-size: 0.75em;
+        color: #aaa;
     }
 }
 
@@ -809,5 +824,177 @@ body.mp-chat #mpChat {
         width: auto;
         height: auto;
         padding: 0.2em 0.5em;
+    }
+}
+
+// team play: a round swatch in the team's color in front of a team's or a player's name
+
+.team-dot {
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    margin-right: 0.4em;
+    border-radius: 50%;
+    // grey: White still shows on the light name tags, Black on the dark lobby
+    box-shadow: 0 0 0 1px #888;
+}
+
+// team play lobby: a block per team; a click on its head joins it
+
+#mpTeamList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    width: 100%;
+}
+
+.mp-team {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    padding: 0.5em;
+    border: 2px solid #333;
+    border-radius: 12px;
+}
+
+.mp-team-head {
+    align-self: flex-start;
+    padding: 0.3em 0.6em;
+    font-size: 0.95em;
+    background: transparent;
+    &:hover:not(:disabled) {
+        background: #272727;
+    }
+}
+
+// the point a team played at the reveal (Midpoint, Leader): bigger than a pin, ringed, shadowed and flagged, so it
+// stands out on any map
+
+.mp-team-point {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    .disc {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        border: 4px solid #fff;
+        border-radius: 50%;
+        background: var(--team);
+        // a dark edge and a shadow: the white border alone vanishes on light maps
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.7), 0 4px 10px rgba(0, 0, 0, 0.6);
+        color: #fff;
+        font-size: 18px;
+        line-height: 1;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    }
+    // a light team color (yellow, white, lime) gets a dark flag
+    &.light .disc {
+        color: #111;
+        text-shadow: none;
+    }
+    // pulses three times when the reveal shows the point, then rests
+    .ring {
+        position: absolute;
+        inset: 0;
+        border: 3px solid var(--team);
+        border-radius: 50%;
+        opacity: 0;
+        animation: mp-team-pulse 1.2s ease-out 3;
+    }
+}
+
+@keyframes mp-team-pulse {
+    from {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(2.2);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mp-team-point .ring {
+        animation: none;
+    }
+}
+
+.leaflet-tooltip.mp-team-tip {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+// the big screen is looked at from across the room
+body.watch-mode .mp-team-point {
+    transform: scale(1.33);
+}
+
+// teammates' guesses (team play): a dot in the team's color. While the leader picks, a dot answers the pointer and the
+// keyboard, and the selected one stands out with a check mark while the others step back
+
+.mp-mate-icon:focus-visible {
+    // the dot's own focus look below says it
+    outline: none;
+}
+
+.mp-mate {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: var(--team);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, opacity 0.12s ease-out;
+    // game.scss gives every marker icon the grab cursor of the draggable guess marker
+    &.picking {
+        cursor: pointer;
+    }
+    &.picking:not(.selected):hover,
+    .mp-mate-icon:focus-visible &.picking:not(.selected) {
+        // a white halo: the team's color may be any of ten, white stands out on all of them
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 0 5px rgba(255, 255, 255, 0.5);
+        opacity: 1;
+        transform: scale(1.4);
+    }
+    &.selected {
+        border-width: 4px;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.7), 0 0 0 7px var(--team), 0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+    // only when it is clicked, not again when the pick is sent
+    &.selected.picking {
+        animation: mp-mate-pick 0.18s ease-out;
+    }
+    &.dimmed {
+        opacity: 0.5;
+    }
+    // a light team color (yellow, white, lime) gets a dark check mark
+    &.light {
+        color: #111;
+        text-shadow: none;
+    }
+}
+
+@keyframes mp-mate-pick {
+    from {
+        transform: scale(0.6);
+    }
+}
+
+.leaflet-tooltip.mp-mate-tip {
+    &.hover,
+    &.selected {
+        // in front of the other names, which may overlap it
+        z-index: 1;
+        font-weight: bold;
     }
 }

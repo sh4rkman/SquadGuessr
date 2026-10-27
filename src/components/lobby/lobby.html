@@ -37,6 +37,8 @@
             </p>
         </div>
         <ul id="mpPlayers" class="mp-players"></ul>
+        <div id="mpTeamList" hidden></div>
+        <button id="BUTTON_MP_SHUFFLE" class="host-only" data-i18n="common:mp.buttons.shuffle" hidden></button>
         <p id="mpSettingsSummary" class="guest-only"></p>
         <div id="mpSettings" class="host-only">
             <label for="mpMode" data-i18n="common:menu.gameMode"></label>
@@ -85,6 +87,40 @@
             <select id="mpKeepCode" data-i18n-title="common:mp.settings.codeHint">
                 <option value="0" data-i18n="common:mp.codeNew"></option>
                 <option value="1" data-i18n="common:mp.codeKeep"></option>
+            </select>
+            <label for="mpTeam" data-i18n="common:mp.settings.team" data-i18n-title="common:mp.settings.teamHint"></label>
+            <div class="mp-pair" data-i18n-title="common:mp.settings.teamHint">
+                <select id="mpTeam">
+                    <option value="off" data-i18n="common:mp.teamModes.off"></option>
+                    <option value="sum" data-i18n="common:mp.teamModes.sum"></option>
+                    <option value="centroid" data-i18n="common:mp.teamModes.centroid"></option>
+                    <option value="leader" data-i18n="common:mp.teamModes.leader"></option>
+                </select>
+                <select id="mpTeamCount" data-i18n-aria-label="common:mp.settings.teams" hidden>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+            <label for="mpPenalty" class="mp-penalty" data-i18n="common:mp.settings.penalty" data-i18n-title="common:mp.settings.penaltyHint" hidden></label>
+            <select id="mpPenalty" class="mp-penalty" hidden>
+                <option value="off" data-i18n="common:mp.off"></option>
+                <option value="on" data-i18n="common:mp.on"></option>
+            </select>
+            <label for="mpDecide" class="mp-decide" data-i18n="common:mp.settings.decide" data-i18n-title="common:mp.settings.decideHint" hidden></label>
+            <select id="mpDecide" class="mp-decide" hidden>
+                <option value="10">10 s</option>
+                <option value="15">15 s</option>
+                <option value="20" selected>20 s</option>
+                <option value="30">30 s</option>
+                <option value="45">45 s</option>
+                <option value="60">60 s</option>
             </select>
         </div>
         <p id="mpWaitingForHost" class="guest-only" data-i18n="common:mp.waitingForHost"></p>

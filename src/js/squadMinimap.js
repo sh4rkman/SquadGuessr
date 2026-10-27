@@ -210,6 +210,8 @@ export const squadMinimap = Map.extend({
      **/
     createGuessMarker(latlng){
         if (App.solutionMarker) return;
+        // Leader: the leader guesses nothing, and nobody guesses while the leaders decide
+        if (App.mp.active && !App.mp.mayGuess()) return;
         
         if (!this.guessMarker && App.selectedMode != "mapFinder") {
             this.guessMarker = new guessMarker(latlng, {}, this).addTo(this.markersGroup);
