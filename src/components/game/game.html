@@ -34,9 +34,11 @@
                     <span class="value" id="points">—</span>
                 </div>
             </div>
-            <p id="mpStatus" hidden></p>
-            <ol id="mpRanking" class="mp-ranking" hidden></ol>
-            <ul id="mpChips" class="mp-players"></ul>
+            <div id="mpBoard">
+                <p id="mpStatus" hidden></p>
+                <ol id="mpRanking" class="mp-ranking" hidden></ol>
+                <ul id="mpChips" class="mp-players"></ul>
+            </div>
             <div id="actions">
                 <input type="text" id="searchMap" maxlength="40" data-i18n-placeholder="common:game.guessPlaceHolder" autocomplete="off" />
                 <button id="BUTTON_GUESS"  data-i18n="common:game.buttons.guess" disabled></button>

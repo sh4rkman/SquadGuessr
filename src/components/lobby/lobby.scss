@@ -252,6 +252,7 @@
     }
 }
 
+#mpBoard,
 #mpChips,
 #mpFinalRanking,
 #mpEnded {
@@ -261,6 +262,9 @@
 body.mp-active,
 body.mp-ended {
     // mp-ended: the results of a finished game, opened through its link, look like the players' own
+    #mpBoard {
+        display: flex;
+    }
     #mpChips {
         display: flex;
         margin-top: 0.5em;
@@ -302,18 +306,81 @@ body.mp-host #mpSettings {
     display: grid !important;
 }
 
-// in-game ranking must leave room for the host's NEXT button
+// in game, status and list share a box of their own: a long list scrolls inside it, never pushing the buttons away
+
+#rightSide #mpBoard {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.5em;
+    min-height: 0;
+    .mp-ranking,
+    #mpChips {
+        min-height: 0;
+        overflow-y: auto;
+    }
+    #mpChips {
+        // a long name breaks inside its chip (phones): never wider than the board, the ✓ stays in sight
+        li {
+            max-width: 100%;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+    }
+    .mp-ranking {
+        margin: 0 auto;
+    }
+}
+
+// not in the board's rule: two ids there would beat the big screen's larger size
 
 #rightSide .mp-ranking {
-    // big real hint images would otherwise squeeze the list to nothing in the flex column
-    flex-shrink: 0;
-    margin: 0.5em auto;
-    max-height: 25vh;
-    overflow-y: auto;
     font-size: 0.85em;
 }
 
-// during reveal the ranking replaces the player chips
+// a player's column (phones: Find the Map only): photo at most half the column, buttons of one height, board the rest
+
+body.mp-active:not(.watch-mode) #rightSide {
+    container-type: size;
+    #preview {
+        flex: 0 0 auto;
+    }
+    .preview-wrapper {
+        width: min(100%, 50cqh);
+        margin: 0 auto;
+    }
+    #actions {
+        flex: 0 0 15%;
+        min-height: 4.5em;
+    }
+}
+
+// no button to show (a guest who locked in, or on a reveal): the board gets their room too
+
+body.mp-active:not(.watch-mode) #gameWrapper:not(.no-map) #rightSide #actions:not(:has(> button:not([hidden]))) {
+    display: none;
+}
+
+// Find the Map: the name field and the buttons get a line each; once a guest locked in (no GUESS) the board gets its line
+
+body.mp-active:not(.watch-mode) #gameWrapper.no-map #rightSide #actions {
+    flex: 0 0 auto;
+    flex-flow: row wrap;
+    min-height: 0;
+    #searchMap,
+    button {
+        height: 3.5rem;
+    }
+    #searchMap {
+        flex: 0 0 100%;
+    }
+    button {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0 0.5em;
+    }
+}
+
+// the ranking replaces the player chips (reveal, a player who locked in, the big screen)
 
 #mpRanking:not([hidden]) ~ #mpChips {
     display: none !important;
@@ -324,6 +391,22 @@ body.mp-host #mpSettings {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+// the standings while a round runs have no +points or moves yet: their columns go, the names get the room
+
+#mpRanking.standings {
+    grid-template-columns: 2.5em 1fr auto;
+    .move,
+    .points {
+        display: none;
+    }
+}
+
+// someone who dropped out, greyed like their chip
+
+.mp-ranking li.offline {
+    opacity: 0.4;
 }
 
 // own guess at the reveal: the navy marker turns red like the own distance line
@@ -337,16 +420,52 @@ body.mp-host #mpSettings {
     gap: 0.3em;
 }
 
-// phones: the game's right column becomes a row; give the MP elements their own full-width line
+// phones: the board goes next to the photo, where GUESS was, down to the buttons' line above the footer
 @media (width <= 768px) {
-    #gameWrapper:not(.no-map) #rightSide {
-        flex-wrap: wrap;
+    // as high as main on phones (index.scss), not the 80dvh of a desktop: no room left unused above the footer
+    body.mp-active #gameWrapper {
+        height: 84dvh;
     }
-    #rightSide #mpStatus,
-    #rightSide .mp-ranking,
-    #rightSide #mpChips {
-        order: 10;
-        flex-basis: 100%;
+    body.mp-active #gameWrapper:not(.no-map) {
+        // the map keeps its half, the right side gets all the rest
+        #rightSide {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr;
+            flex: 1 1 0;
+            min-height: 0;
+            // never higher than its line (small phones), so the buttons below stay above the footer
+            .preview-wrapper {
+                width: min(100%, 100cqh - 3.5rem - 8px);
+            }
+            #mpBoard {
+                // however long the list: it scrolls instead of making the line higher
+                contain: size;
+                font-size: 0.8em;
+            }
+            #actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                height: 3.5rem;
+                min-height: 0;
+                margin-left: 0;
+                button {
+                    flex: 1 1 0;
+                    min-width: 0;
+                    height: 100%;
+                    padding: 0 0.5em;
+                }
+            }
+        }
+    }
+    // the ranking up (locked in, reveal): the photo has done its job, the list gets its room
+    body.mp-active:not(.watch-mode) #rightSide:has(#mpRanking:not([hidden])) {
+        #preview {
+            display: none;
+        }
+        #mpBoard {
+            grid-column: 1 / -1;
+        }
     }
 }
 
@@ -408,8 +527,17 @@ body.watch-mode {
     #rightSide .mp-ranking,
     .mp-ranking {
         width: min(700px, 100%);
-        max-height: none;
         font-size: 1.3em;
+    }
+    // nobody can scroll a big screen: the lines get as small as it takes for everyone to fit (--rows: renderRanking)
+    #rightSide #mpBoard {
+        container-type: size;
+        .mp-ranking {
+            font-size: min(1.3em, (100cqh - 3em) / var(--rows, 12) / 1.7);
+            li {
+                padding-block: 0.2em;
+            }
+        }
     }
     #mpFinalRanking li:nth-child(-n + 3) {
         font-size: 1.4em;
@@ -419,25 +547,39 @@ body.watch-mode {
     }
 }
 
-// guessing on the big screen (phones keep the stacked layout): map and square photo share one side, so they line up
+// big screen while guessing (not on phones): map, square photo and standings side by side, all as high as the photo
 
 @media (width > 768px) {
-    body.watch-mode:not(.mp-reveal) #gameWrapper:not(.no-map) {
+    body.watch-mode:not(.mp-reveal) #gameWrapper {
         container-type: size;
 
-        --side: min(100cqh, 45cqw);
+        --side: min(100cqh, 36cqw);
+        // Find the Map has no map: photo and standings get its room
+        &.no-map {
+            --side: min(100cqh, 45cqw);
+        }
         #leftSide {
             height: var(--side);
         }
         #rightSide {
             flex: 0 0 auto;
-            width: var(--side);
-            height: auto;
+            flex-direction: row;
+            gap: 3em;
+            width: auto;
+            max-width: none;
+            height: var(--side);
+        }
+        #preview {
+            flex: 0 0 auto;
         }
         #hint-wrapper,
         #hint {
             width: var(--side);
             height: var(--side);
+            max-height: none;
+        }
+        #mpBoard {
+            flex: 0 0 22cqw;
         }
     }
 }
@@ -451,6 +593,15 @@ body.watch-mode.mp-reveal {
     }
     #rightSide {
         width: 24%;
+        container-type: size;
+        // the photo gives way to the ranking under it: at most 40% of the column
+        #preview {
+            flex: 0 0 auto;
+        }
+        .preview-wrapper {
+            width: min(100%, 40cqh);
+            margin: 0 auto;
+        }
     }
 }
 
