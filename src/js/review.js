@@ -1,7 +1,9 @@
 import i18next from "i18next";
+import { LayerGroup } from "leaflet";
 import { MAPS, findMap } from "./data/maps.js";
 import { squadMinimap } from "./squadMinimap.js";
 import { guessMarker } from "./guessMarker.js";
+import { ExistingGuesses, tooltip } from "./existingGuesses.js";
 import { newImageId, packGuesses, unpackGuesses, zipFileName, downloadZip, isWebp } from "./guessPack.js";
 import { IMAGE_SIZE, squareWebp } from "./webp.js";
 
@@ -44,6 +46,10 @@ export default class Review {
         this.app = app;
         this.minimap = null;
         this.drawnMap = null;
+        // dots of the guesses already in the game, to spot a guess that repeats one of them
+        this.existing = null;
+        // dots of the other guesses in the queue on the shown map, in another colour
+        this.queued = null;
         this.items = [];
         this.index = 0;
         this.dirty = false;
@@ -110,6 +116,8 @@ export default class Review {
             // the review only looks: clicks place nothing
             this.minimap._handleclick = () => {};
             this.minimap._handleDoubleClick = () => {};
+            this.existing = new ExistingGuesses(this.minimap, this.app);
+            this.queued = new LayerGroup().addTo(this.minimap);
         }
         // the window may have changed size while the view was hidden
         this.minimap.invalidateSize();
@@ -174,24 +182,34 @@ export default class Review {
         $("#BUTTON_REVIEW_ACCEPT").toggleClass("chosen", item.status === "accepted");
         $("#BUTTON_REVIEW_REJECT").toggleClass("chosen", item.status === "rejected");
 
-        this.showOnMap(item.entry);
+        this.showOnMap(item);
         this.renderStrip();
     }
 
-    showOnMap(entry) {
+    showOnMap({ entry, status }) {
         // the map was hidden (size 0) until the first ZIP arrived
         this.minimap.invalidateSize();
         this.minimap.markersGroup.clearLayers();
+        this.queued.clearLayers();
         if (!entry) return;
         const map = findMap(entry.map);
         if (map !== this.drawnMap) {
             this.minimap.activeMap = map;
             this.minimap.draw();
             this.drawnMap = map;
+            this.existing.show(map);
         }
+        // the guess under review has its own marker; colours in review.scss (.review-queued, .review-accepted, .review-rejected)
+        const decided = (s) => (s === "accepted" || s === "rejected" ? `review-${s}` : undefined);
+        this.items
+            .filter((item, index) => index !== this.index && item.entry?.map === entry.map)
+            .forEach(item => this.existing.dot(item.entry, decided(item.status) ?? "review-queued", `review.markers.${item.status}`).addTo(this.queued));
         // same conversion as the game's solution marker (getSolutionLatLng)
         const latlng = [entry.lat * this.minimap.gameToMapScale, entry.lng * this.minimap.gameToMapScale];
-        new guessMarker(latlng, { draggable: false }, this.minimap).addTo(this.minimap.markersGroup);
+        new guessMarker(latlng, { draggable: false, iconClass: decided(status) }, this.minimap)
+            // above the pin: its anchor is the tip
+            .bindTooltip(tooltip(`review.markers.${status}`), { direction: "top", offset: [0, -45] })
+            .addTo(this.minimap.markersGroup);
         this.minimap.setView(latlng, REVIEW_ZOOM);
     }
 
@@ -234,6 +252,7 @@ export default class Review {
         this.index = 0;
         this.dirty = false;
         this.minimap?.markersGroup.clearLayers();
+        this.queued?.clearLayers();
         $("#reviewImage").removeAttr("src");
         $("#reviewStrip").empty();
         $("#reviewMain").prop("hidden", true);

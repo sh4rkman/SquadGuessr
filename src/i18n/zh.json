@@ -158,6 +158,7 @@
         "remove": "删除",
         "removeImage": "移除图片",
         "edit": "编辑",
+        "existingGuess": "已有猜测图",
         "choice": {
             "submit": "提交",
             "review": "审核"

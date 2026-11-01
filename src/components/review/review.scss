@@ -152,3 +152,27 @@
         }
     }
 }
+
+.review-queued {
+    // dots of the other guesses in the queue, on the review map (the game's guesses are .submit-existing)
+    fill: #e69500;
+    stroke: #fff;
+}
+
+.review-accepted {
+    // an accepted guess: its dot, or its marker while it is the one under review (the blue marker turned green)
+    fill: #2e9e3e;
+    stroke: #fff;
+    &.leaflet-marker-icon {
+        filter: hue-rotate(245deg) saturate(1.5) brightness(1.6);
+    }
+}
+
+.review-rejected {
+    // a rejected guess: its dot, or its marker while it is the one under review (the blue marker turned red)
+    fill: #d32f2f;
+    stroke: #fff;
+    &.leaflet-marker-icon {
+        filter: hue-rotate(125deg) saturate(1.5) brightness(1.6);
+    }
+}

@@ -20,17 +20,6 @@ header {
             // half the loader's 8px: the header logo is half its size (3em vs 6em)
             border-radius: 4px;
         }
-        #beta {
-            background-color: firebrick;
-            font-size: 0.4em;
-            padding: 0 5px;
-            transform: rotate(-10deg); // Tilt to the left
-            display: inline-block; // Required for transform to work
-            border-radius: 5px;
-            position: absolute;
-            margin-top: 45px;
-            margin-left: -20px;
-        }
     }
 }
 
@@ -38,10 +27,5 @@ header {
     header {
         height: 10dvh;
         font-size: 0.65em;
-        #MAINLOGO {
-            #beta {
-                margin-top: 35px;
-            }
-        }
     }
 }

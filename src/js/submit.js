@@ -1,8 +1,8 @@
 import i18next from "i18next";
-import { CircleMarker, LayerGroup, SVG } from "leaflet";
 import { MAPS, findMap } from "./data/maps.js";
 import { squadMinimap } from "./squadMinimap.js";
 import { guessMarker } from "./guessMarker.js";
+import { ExistingGuesses } from "./existingGuesses.js";
 import { newImageId, packGuesses, zipFileName, downloadZip } from "./guessPack.js";
 import { IMAGE_SIZE, centredSquare, squareWebp } from "./webp.js";
 
@@ -35,8 +35,6 @@ export default class Submit {
         this.dirty = false;
         // dots of the guesses already in the game, to spot the areas nobody covered yet
         this.existing = null;
-        // counts position fetches: only the latest map's answer may be drawn
-        this.audits = 0;
     }
 
     init() {
@@ -89,14 +87,7 @@ export default class Submit {
             // the game's handlers look at the game's state (solution marker, mode): this view places its own marker
             this.minimap._handleclick = (e) => this.placeMarker(e.latlng);
             this.minimap._handleDoubleClick = (e) => this.placeMarker(e.latlng);
-            // own pane above the basemap (overlayPane, 400) and under the marker (markerPane, 600);
-            // own group since markersGroup is cleared by minimap.clear()
-            const pane = this.minimap.createPane("existingGuesses");
-            pane.style.zIndex = 450;
-            pane.style.pointerEvents = "none";
-            this.existing = new LayerGroup().addTo(this.minimap);
-            // same padding as the map's renderer: dots stay drawn while panning
-            this.existingRenderer = new SVG({ pane: "existingGuesses", padding: 3 });
+            this.existing = new ExistingGuesses(this.minimap, this.app);
         }
         this.minimap.invalidateSize();
     }
@@ -215,45 +206,8 @@ export default class Submit {
         this.marker = null;
         this.minimap.activeMap = this.map;
         this.minimap.draw();
-        this.showExisting();
+        this.existing.show(this.map);
         this.updateButtons();
-    }
-
-    /**
-     * Draws a dot on every guess position the API already holds for the selected map
-     */
-    async showExisting() {
-        const audit = ++this.audits;
-        this.existing.clearLayers();
-        if (!this.map) return;
-        const map = this.map;
-        let positions;
-        try {
-            const response = await fetch(`/api/get/squadGuess/positions?map=${encodeURIComponent(map.name)}`, {
-                headers: { "X-App-Version": this.app.version }
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            // { map, count, positions: [{ lat, lng, mode }] } in game coordinates
-            ({ positions } = await response.json());
-        } catch (error) {
-            console.debug("Error fetching existing guess positions", error);
-            return;
-        }
-        // another map may have been chosen while this one was loading
-        if (audit !== this.audits || !Array.isArray(positions)) return;
-        const scale = this.minimap.gameToMapScale;
-        positions.forEach(p => {
-            new CircleMarker([p.lat * scale, p.lng * scale], {
-                pane: "existingGuesses",
-                renderer: this.existingRenderer,
-                // colours in submit.scss (.submit-existing)
-                className: "submit-existing",
-                radius: 5,
-                weight: 1.5,
-                fillOpacity: 0.9,
-                interactive: false,
-            }).addTo(this.existing);
-        });
     }
 
     placeMarker(latlng) {

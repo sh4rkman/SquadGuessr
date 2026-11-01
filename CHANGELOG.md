@@ -1,3 +1,26 @@
+# <img src="https://img.shields.io/badge/-unreleased-888888?style=for-the-badge"> **Unreleased**
+
+</br><img src="https://img.shields.io/badge/-new%20features-green">
+- Added dots for existing and queued guesses on the review map, colour-coded by status, to spot repeats before export
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+
+
+# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **2.2.0** *(2026-10-26)*
+
+</br><img src="https://img.shields.io/badge/-new%20features-green">
+- Added chat to the multiplayer lobby, with join/leave/kick notifications (by Hans-Vader in [#34](https://github.com/sh4rkman/SquadGuessr/pull/34))
+- Added an option to keep the game code for subsequent rounds, and support for viewing results of finished games (by Hans-Vader in [#35](https://github.com/sh4rkman/SquadGuessr/pull/35))
+- Added a last-seconds warning in the timer while a guess is still missing (by Hans-Vader in [#36](https://github.com/sh4rkman/SquadGuessr/pull/36))
+- The lobby's join and watch links are now clickable (by Hans-Vader in [#37](https://github.com/sh4rkman/SquadGuessr/pull/37))
+- Guests' ready status now resets when the host changes the settings (by Hans-Vader in [#38](https://github.com/sh4rkman/SquadGuessr/pull/38))
+- Expanded the submission guide with detailed steps, a visibility toggle and upload instructions (by Hans-Vader in [#39](https://github.com/sh4rkman/SquadGuessr/pull/39))
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+
+
 # <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **2.1.0** *(2026-10-17)*
 
 </br><img src="https://img.shields.io/badge/-new%20features-green">
