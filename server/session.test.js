@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { Session, MAX_PLAYERS, RECONNECT_MS, LOAD_FIRST_MS, LOAD_MS, COUNTDOWN_READY_MS, COUNTDOWN_FORCED_MS, KICK_WAIT_MS, HANDOVER_MS, MAX_PAST } from "./session.js";
+import { Session, MAX_PLAYERS, RECONNECT_MS, LOAD_FIRST_MS, LOAD_MS, COUNTDOWN_READY_MS, COUNTDOWN_FORCED_MS, KICK_WAIT_MS, HANDOVER_MS, MAX_PAST, GRACE_MS } from "./session.js";
 import { CHAT_MAX, CHAT_GAP_MS, CHAT_HISTORY } from "../src/js/chatLimits.js";
 import { mapSize } from "../src/js/scoring.js";
 
@@ -1491,4 +1491,516 @@ test("someone new who joins the countdown after everyone left still gets the tim
     assert.equal(s.phase, "loading");
     s.handle(late, { type: "ready", index: 0 });
     assert.equal(s.phase, "round");
+});
+
+// ===== TEAM PLAY =====
+
+const SUM = { ...CLASSIC, team: "sum", teams: 2, penalty: false, decide: 20 };
+
+// a team lobby: Hans (host) and Ida in team 0, Max and Eve in team 1, since every newcomer goes to the smallest team
+function teamLobby(settings = SUM) {
+    const ctx = setup(settings);
+    const [max, ida, eve] = ["Max", "Ida", "Eve"].map(name => {
+        const conn = { id: name };
+        ctx.s.join(conn, { name });
+        return conn;
+    });
+    const teamOf = (name) => ctx.s.findPlayer(p => p.name === name).team;
+    return { ...ctx, max, ida, eve, teamOf };
+}
+
+function teamGame(settings) {
+    const ctx = teamLobby(settings);
+    ctx.begin();
+    return ctx;
+}
+
+test("a session holds up to 30 players", () => {
+    assert.equal(MAX_PLAYERS, 30);
+});
+
+test("team play: the settings carry the team fields; without teams they stay what they were", () => {
+    const { host, last } = setup(SUM);
+    assert.deepEqual(last(host, "state").settings, SUM);
+    const plain = setup({ ...CLASSIC, team: "off", teams: 4, penalty: true });
+    assert.deepEqual(plain.last(plain.host, "state").settings, CLASSIC);
+});
+
+test("team play: every newcomer goes to the smallest team, the lowest one on a tie", () => {
+    const { host, last } = teamLobby();
+    assert.deepEqual(last(host, "state").players.map(p => [p.name, p.team]), [["Hans", 0], ["Max", 1], ["Ida", 0], ["Eve", 1]]);
+});
+
+test("team play: once START was pressed, newcomers only fill teams that already play", () => {
+    // Midpoint: in Sum nobody new joins the countdown (see below)
+    const { s, host, last } = setup({ ...SUM, team: "centroid", teams: 4 });
+    s.join({}, { name: "Max" });
+    s.join({}, { name: "Ida" });
+    s.handle(host, { type: "start", guesses: GUESSES });
+    s.join({}, { name: "Late" });
+    // teams 0–2 have one player each, team 3 none: the late one joins team 0, not a team of their own
+    assert.equal(last(host, "state").players.find(p => p.name === "Late").team, 0);
+});
+
+test("team play: a player switches teams in the lobby; a bad team is refused, a click after START is ignored", () => {
+    // Midpoint: in Sum the uneven teams would hold START back
+    const { s, host, max, last, all, teamOf } = teamLobby({ ...SUM, team: "centroid" });
+    s.handle(max, { type: "team", team: 0 });
+    assert.equal(teamOf("Max"), 0);
+    assert.equal(last(host, "state").players.find(p => p.name === "Max").team, 0);
+    for (const team of [2, -1, 0.5, "1"]) {
+        s.handle(max, { type: "team", team });
+        assert.equal(last(max, "error").code, "INVALID", `team ${team}`);
+    }
+    s.handle(host, { type: "start", guesses: GUESSES });
+    const errors = all(max, "error").length;
+    s.handle(max, { type: "team", team: 1 });
+    assert.equal(all(max, "error").length, errors);
+    assert.equal(teamOf("Max"), 0);
+});
+
+test("team play: the host shuffles everyone into teams that differ by one at most", () => {
+    const { s, host, max, last } = teamLobby({ ...SUM, teams: 3 });
+    s.join({}, { name: "Ana" });
+    s.handle(max, { type: "shuffle" });
+    assert.equal(last(max, "error").code, "NOT_HOST");
+    s.handle(host, { type: "shuffle" });
+    const sizes = [0, 1, 2].map(team => last(host, "state").players.filter(p => p.team === team).length);
+    assert.deepEqual(sizes.sort(), [1, 2, 2]);
+});
+
+test("team play: a shuffle is announced to everyone right before the state with the new teams", () => {
+    const { s, sent, host, max, ida } = teamLobby();
+    s.handle(host, { type: "shuffle" });
+    // the page tells its player the new team (and lead) from that state, not from a switch of their own
+    [host, max, ida].forEach(conn => {
+        const mine = sent.filter(x => x.conn === conn).map(x => x.msg.type);
+        assert.deepEqual(mine.slice(-2), ["shuffled", "state"], conn.id);
+    });
+});
+
+test("Leader: after a shuffle the first player dealt to a team leads it, not whoever joined first", () => {
+    const { s, host } = teamLobby(LEADER);
+    // one clock tick for the whole shuffle: only the deal may order the players. The host is the first to join, so
+    // led every time with the join order; with the deal they lead about every other time (all 20 by chance: 1 in 10^6)
+    const id = s.findPlayer(p => p.conn === host).id;
+    const led = Array.from({ length: 20 }, () => {
+        s.handle(host, { type: "shuffle" });
+        return s.leaders.includes(id);
+    });
+    assert.ok(led.includes(false));
+});
+
+test("team play: shuffling needs team play", () => {
+    const { s, host, last } = withGuest();
+    s.handle(host, { type: "shuffle" });
+    assert.equal(last(host, "error").code, "INVALID");
+});
+
+test("team play: with fewer teams, the players of the dropped ones go to the smallest teams left", () => {
+    const { s, host, teamOf } = teamLobby({ ...SUM, teams: 4 });
+    assert.deepEqual(["Hans", "Max", "Ida", "Eve"].map(teamOf), [0, 1, 2, 3]);
+    s.handle(host, { type: "settings", settings: SUM });
+    assert.deepEqual(["Hans", "Max", "Ida", "Eve"].map(teamOf), [0, 1, 0, 1]);
+});
+
+test("team play: START needs players in two teams at least", () => {
+    const { s, host, max, eve, last } = teamLobby();
+    s.handle(max, { type: "team", team: 0 });
+    s.handle(eve, { type: "team", team: 0 });
+    assert.equal(last(host, "state").canStart, false);
+    s.handle(host, { type: "start", guesses: GUESSES });
+    assert.equal(last(host, "error").code, "NO_PLAYERS");
+    s.handle(eve, { type: "team", team: 1 });
+    s.handle(max, { type: "team", team: 1 });
+    assert.equal(last(host, "state").canStart, true);
+});
+
+test("team play: who comes back under their name without the token takes their old place, team included", () => {
+    const { s, max, teamOf } = teamLobby();
+    // team 0: Hans, Ida, Max; team 1: Eve, the smallest one
+    s.handle(max, { type: "team", team: 0 });
+    s.disconnect(max);
+    s.join({}, { name: "Max" });
+    assert.equal(teamOf("Max"), 0);
+});
+
+test("team play sum: START needs teams of the same size", () => {
+    const { s, host, last } = teamLobby();
+    s.join({}, { name: "Ana" });
+    assert.equal(last(host, "state").canStart, false);
+    s.handle(host, { type: "start", guesses: GUESSES });
+    assert.equal(last(host, "error").code, "NO_PLAYERS");
+    s.join({}, { name: "Bob" });
+    assert.equal(last(host, "state").canStart, true);
+});
+
+test("team play sum: nobody new joins the countdown, a team would grow; who comes back keeps their place", () => {
+    const { s, host, ida, last } = teamLobby();
+    s.handle(host, { type: "start", guesses: GUESSES });
+    const late = {};
+    assert.equal(s.join(late, { name: "Late" }), false);
+    assert.equal(last(late, "error").code, "GAME_RUNNING");
+    s.disconnect(ida);
+    assert.equal(s.join({}, { token: last(ida, "welcome").token }), true);
+    s.disconnect(s.findPlayer(p => p.name === "Ida").conn);
+    assert.equal(s.join({}, { name: "Ida" }), true);
+});
+
+// an answer for round 1 that lies `d` meters straight south of its solution (Narva, lat -100, lng 200)
+const south = (d) => ({ type: "answer", index: 0, lat: -100 - d, lng: 200 });
+// on Narva: the last scoring step, beyond which a guess scores 0
+const ZONE = 500 * mapSize("Narva") / 3000;
+
+test("team play: a player sees their team's guesses once they answered, positions only; other teams and watchers never", () => {
+    const { s, host, max, ida, eve, all, last } = teamGame();
+    const tv = {};
+    s.watch(tv);
+    s.handle(host, south(0));
+    const hans = last(host, "welcome").playerId;
+    assert.deepEqual(last(host, "teamGuesses"), { type: "teamGuesses", index: 0, guesses: [{ id: hans, name: "Hans", lat: -100, lng: 200 }] });
+    assert.deepEqual([all(ida, "teamGuesses"), all(max, "teamGuesses"), all(eve, "teamGuesses"), all(tv, "teamGuesses")], [[], [], [], []]);
+    s.handle(ida, south(100));
+    assert.deepEqual(last(host, "teamGuesses").guesses.map(g => g.name), ["Hans", "Ida"]);
+    assert.deepEqual(last(ida, "teamGuesses").guesses.map(g => g.name), ["Hans", "Ida"]);
+    assert.deepEqual([all(max, "teamGuesses"), all(eve, "teamGuesses"), all(tv, "teamGuesses")], [[], [], []]);
+});
+
+test("team play: without teams nobody gets team guesses", () => {
+    const { s, host, guest, all } = started();
+    s.handle(host, { type: "answer", index: 0, lat: -100, lng: 200 });
+    assert.deepEqual([all(host, "teamGuesses"), all(guest, "teamGuesses")], [[], []]);
+});
+
+test("team play: a player who reconnects during the round gets their team's guesses again", () => {
+    const { s, host, ida, last } = teamGame();
+    s.handle(host, south(0));
+    s.handle(ida, south(100));
+    s.disconnect(ida);
+    const phone = {};
+    s.join(phone, { token: last(ida, "welcome").token });
+    assert.deepEqual(last(phone, "teamGuesses").guesses.map(g => g.name), ["Hans", "Ida"]);
+});
+
+test("team play sum: a team scores the sum of its players' points", () => {
+    const { s, host, max, ida, eve, last } = teamGame();
+    s.handle(host, south(0));
+    s.handle(ida, south(2 * ZONE));
+    s.handle(max, south(0));
+    s.handle(eve, south(0));
+    const reveal = last(host, "reveal");
+    assert.deepEqual(reveal.teams, [
+        { id: 1, points: 200, lat: null, lng: null, picked: null, score: 200 },
+        { id: 0, points: 100, lat: null, lng: null, picked: null, score: 100 },
+    ]);
+    assert.deepEqual(reveal.results.map(r => [r.name, r.team]).sort(), [["Eve", 1], ["Hans", 0], ["Ida", 0], ["Max", 1]]);
+});
+
+test("team play sum with minus points: a far guess costs up to 50, and so does giving no answer", () => {
+    const { s, host, ida, eve, last } = teamGame({ ...SUM, penalty: true });
+    s.handle(host, south(0));
+    // halfway from the last scoring step to three times its distance: −25
+    s.handle(ida, south(2 * ZONE));
+    s.handle(eve, south(0));
+    // Max gives no answer: −50
+    s.handle(host, { type: "endRound" });
+    const reveal = last(host, "reveal");
+    assert.deepEqual(reveal.results.map(r => [r.name, r.points]).sort(), [["Eve", 100], ["Hans", 100], ["Ida", -25], ["Max", -50]]);
+    // 100 − 25 and 100 − 50
+    assert.deepEqual(reveal.teams.map(t => [t.id, t.points]), [[0, 75], [1, 50]]);
+});
+
+test("team play sum with minus points: a player gone for good adds nothing, not even minus points", () => {
+    const { s, host, max, ida, eve, last, advance } = teamGame({ ...SUM, penalty: true });
+    s.disconnect(eve);
+    s.handle(host, south(0));
+    s.handle(ida, south(0));
+    s.handle(max, south(0));
+    advance(RECONNECT_MS);
+    s.tick();
+    assert.deepEqual(last(host, "reveal").teams.map(t => [t.id, t.points]), [[0, 200], [1, 100]]);
+});
+
+test("team play: a team whose players all left stays in the ranking and scores 0 from then on", () => {
+    const { s, host, max, ida, eve, last } = teamGame();
+    s.handle(max, { type: "leave" });
+    s.handle(eve, { type: "leave" });
+    s.handle(host, south(0));
+    s.handle(ida, south(0));
+    assert.deepEqual(last(host, "reveal").teams.map(t => [t.id, t.points, t.score]), [[0, 200, 200], [1, 0, 0]]);
+});
+
+test("team play: the final ranks the teams with their players, a tie has two winners; the teams stay for the next game", () => {
+    const { s, host, max, ida, eve, last, begin, teamOf } = teamGame();
+    for (let i = 0; i < 3; i++) {
+        [host, max, ida, eve].forEach(conn => s.handle(conn, { type: "answer", index: i, lat: GUESSES[i].lat, lng: GUESSES[i].lng }));
+        readyAll(s, s.round + 1);
+        s.handle(host, { type: "next" });
+    }
+    const final = last(eve, "final");
+    assert.deepEqual(final.ranking, [{ id: 0, score: 600, members: ["Hans", "Ida"] }, { id: 1, score: 600, members: ["Max", "Eve"] }]);
+    assert.deepEqual(final.winners, [0, 1]);
+    s.handle(host, { type: "lobby" });
+    assert.deepEqual(["Hans", "Max", "Ida", "Eve"].map(teamOf), [0, 1, 0, 1]);
+    // the next game starts every team at 0 again
+    begin();
+    s.handle(host, { type: "endRound" });
+    assert.deepEqual(last(host, "reveal").teams.map(t => t.score), [0, 0]);
+});
+
+test("team play: without teams the reveal carries nothing about teams", () => {
+    const { s, host, guest, last } = started();
+    s.handle(host, { type: "endRound" });
+    const reveal = last(guest, "reveal");
+    assert.equal("teams" in reveal, false);
+    assert.equal("team" in reveal.results[0], false);
+});
+
+test("team play: the state carries the team scores for the score in the corner; without teams it does not", () => {
+    const { s, host, ida, last } = teamGame();
+    s.handle(host, south(0));
+    s.handle(ida, south(0));
+    // Max and Eve gave no answer: 0
+    s.handle(host, { type: "endRound" });
+    assert.deepEqual(last(host, "state").teamScores, [200, 0]);
+    const plain = started();
+    assert.equal("teamScores" in plain.last(plain.host, "state"), false);
+});
+
+const CENTROID = { ...SUM, team: "centroid" };
+
+test("team play midpoint: a team plays the midpoint of its guesses, scored like any guess", () => {
+    const { s, host, max, ida, last } = teamGame(CENTROID);
+    s.handle(host, { type: "answer", index: 0, lat: -100, lng: 50 });
+    s.handle(ida, { type: "answer", index: 0, lat: -100, lng: 350 });
+    s.handle(max, south(2 * ZONE));
+    // Eve gives no answer: she is left out of her team's midpoint
+    s.handle(host, { type: "endRound" });
+    const reveal = last(host, "reveal");
+    assert.deepEqual(reveal.teams, [
+        { id: 0, points: 100, lat: -100, lng: 200, picked: null, score: 100 },
+        { id: 1, points: 0, lat: -100 - 2 * ZONE, lng: 200, picked: null, score: 0 },
+    ]);
+    // the players' own points are only shown: Hans was 150 m off
+    assert.ok(reveal.results.find(r => r.name === "Hans").points < 100);
+});
+
+test("team play midpoint: a team without a single guess scores 0 and has no point on the map", () => {
+    const { s, host, last } = teamGame(CENTROID);
+    s.handle(host, south(0));
+    s.handle(host, { type: "endRound" });
+    assert.deepEqual(last(host, "reveal").teams.find(t => t.id === 1), { id: 1, points: 0, lat: null, lng: null, picked: null, score: 0 });
+});
+
+test("team play: whoever is first in a team leads it, and can hand the role to a teammate in the lobby", () => {
+    const { s, host, max, eve, last } = teamLobby();
+    const id = (conn) => last(conn, "welcome").playerId;
+    const leaders = () => last(host, "state").players.filter(p => p.leader).map(p => p.name);
+    assert.deepEqual(leaders(), ["Hans", "Max"]);
+    s.handle(max, { type: "lead", playerId: id(eve) });
+    assert.deepEqual(leaders(), ["Hans", "Eve"]);
+    // only the leader, and only to someone in their own team
+    s.handle(max, { type: "lead", playerId: id(max) });
+    assert.equal(last(max, "error").code, "INVALID");
+    s.handle(host, { type: "lead", playerId: id(eve) });
+    assert.equal(last(host, "error").code, "INVALID");
+    assert.deepEqual(leaders(), ["Hans", "Eve"]);
+});
+
+test("team play: when a leader leaves or switches teams, whoever has been in the team longest leads it", () => {
+    const { s, host, max, ida, last, advance } = teamLobby();
+    const leaders = () => last(ida, "state").players.filter(p => p.leader).map(p => p.name);
+    advance(1000);
+    s.handle(max, { type: "team", team: 0 });
+    // team 0: Hans, Ida, then Max; team 1: Eve alone now
+    assert.deepEqual(leaders(), ["Hans", "Eve"]);
+    s.handle(host, { type: "leave" });
+    assert.deepEqual(leaders(), ["Ida", "Eve"]);
+});
+
+test("team play: a leader gone longer than a reload hands the team to a connected teammate", () => {
+    const { s, max, eve, last, advance } = teamGame();
+    const leads = (name) => last(eve, "state").players.find(p => p.name === name).leader;
+    s.disconnect(max);
+    advance(RECONNECT_MS - 1);
+    s.tick();
+    assert.equal(leads("Max"), true);
+    advance(1);
+    s.tick();
+    assert.deepEqual([leads("Max"), leads("Eve")], [false, true]);
+});
+
+test("team play: after shuffling, every team has a leader of its own", () => {
+    const { s, host, last } = teamLobby();
+    s.handle(host, { type: "shuffle" });
+    const players = last(host, "state").players;
+    assert.deepEqual([0, 1].map(team => players.filter(p => p.team === team && p.leader).length), [1, 1]);
+});
+
+const LEADER = { ...SUM, team: "leader" };
+
+// Leader needs three players per team: Ana joins Hans and Ida in team 0, Bob joins Max and Eve in team 1
+function leaderLobby(settings = LEADER) {
+    const ctx = teamLobby(settings);
+    const [ana, bob] = ["Ana", "Bob"].map(name => {
+        const conn = { id: name };
+        ctx.s.join(conn, { name });
+        return conn;
+    });
+    return { ...ctx, ana, bob };
+}
+
+function leaderGame(settings) {
+    const ctx = leaderLobby(settings);
+    ctx.begin();
+    return ctx;
+}
+
+test("team play leader: START needs three players in every team that plays, so every leader has a choice", () => {
+    const { s, host, bob, last } = leaderLobby();
+    assert.equal(last(host, "state").canStart, true);
+    // Bob moves over: Red keeps two, so its leader would have a single guess to pick
+    s.handle(bob, { type: "team", team: 0 });
+    assert.equal(last(host, "state").canStart, false);
+    s.handle(host, { type: "start", guesses: GUESSES });
+    assert.equal(last(host, "error").code, "NO_PLAYERS");
+});
+
+test("team play leader: the leader cannot guess; once the others answered, the leaders decide", () => {
+    const { s, host, ida, eve, ana, bob, last } = leaderGame();
+    s.handle(host, south(0));
+    assert.equal(last(host, "error").code, "INVALID");
+    [ida, ana, eve].forEach(conn => s.handle(conn, south(0)));
+    assert.equal(s.phase, "round");
+    s.handle(bob, south(0));
+    assert.equal(last(host, "state").phase, "decide");
+    assert.deepEqual(last(host, "decide"), { type: "decide", index: 0, deadline: s.now() + 20_000, teams: [0, 1] });
+});
+
+test("team play leader: the leader sees the team's guesses at once, and the whole team does while the leader decides", () => {
+    const { s, host, max, ida, eve, all, last } = leaderGame();
+    s.handle(ida, south(0));
+    assert.deepEqual(last(host, "teamGuesses").guesses.map(g => g.name), ["Ida"]);
+    assert.deepEqual([all(max, "teamGuesses"), all(eve, "teamGuesses")], [[], []]);
+    s.handle(host, { type: "endRound" });
+    // nobody in Red answered: the team has nothing to pick from, so only Hans decides
+    assert.deepEqual(last(eve, "teamGuesses"), { type: "teamGuesses", index: 0, guesses: [] });
+    assert.deepEqual(last(host, "decide").teams, [0]);
+});
+
+test("team play leader: each leader picks one guess of their own team; once all have, the reveal shows the picks", () => {
+    const { s, host, max, ida, eve, all, last } = leaderGame();
+    const id = (conn) => last(conn, "welcome").playerId;
+    s.handle(ida, south(0));
+    s.handle(eve, south(2 * ZONE));
+    s.handle(host, { type: "endRound" });
+    // not of the own team, not a leader, not this round
+    s.handle(host, { type: "pick", index: 0, playerId: id(eve) });
+    s.handle(ida, { type: "pick", index: 0, playerId: id(ida) });
+    s.handle(host, { type: "pick", index: 1, playerId: id(ida) });
+    assert.deepEqual([all(host, "error").length, all(ida, "error").length], [2, 1]);
+    s.handle(host, { type: "pick", index: 0, playerId: id(ida) });
+    assert.equal(last(eve, "state").players.find(p => p.name === "Hans").picked, true);
+    // one pick per team
+    s.handle(host, { type: "pick", index: 0, playerId: id(ida) });
+    assert.equal(all(host, "error").length, 3);
+    assert.equal(s.phase, "decide");
+    s.handle(max, { type: "pick", index: 0, playerId: id(eve) });
+    assert.deepEqual(last(eve, "reveal").teams, [
+        { id: 0, points: 100, lat: -100, lng: 200, picked: id(ida), score: 100 },
+        { id: 1, points: 0, lat: -100 - 2 * ZONE, lng: 200, picked: id(eve), score: 0 },
+    ]);
+});
+
+test("team play leader: the decision ends after decide seconds; a team whose leader did not pick scores 0", () => {
+    const { s, host, ida, eve, last, advance } = leaderGame();
+    const idaId = last(ida, "welcome").playerId;
+    s.handle(ida, south(0));
+    s.handle(eve, south(0));
+    s.handle(host, { type: "endRound" });
+    s.handle(host, { type: "pick", index: 0, playerId: idaId });
+    advance(20_000 + GRACE_MS - 1);
+    s.tick();
+    assert.equal(s.phase, "decide");
+    advance(1);
+    s.tick();
+    assert.deepEqual(last(host, "reveal").teams.map(t => [t.id, t.points, t.lat, t.picked]), [[0, 100, -100, idaId], [1, 0, null, null]]);
+});
+
+test("team play leader: with no guess in any team there is nothing to decide", () => {
+    const { s, host, last } = leaderGame();
+    s.handle(host, { type: "endRound" });
+    assert.equal(s.phase, "reveal");
+    assert.equal(last(host, "decide"), undefined);
+});
+
+test("team play leader: a leader gone during the decision hands it to a teammate, who may pick their own guess", () => {
+    const { s, host, max, ida, eve, all, last, advance } = leaderGame({ ...LEADER, decide: 60 });
+    const id = (conn) => last(conn, "welcome").playerId;
+    s.handle(ida, south(0));
+    s.handle(eve, south(0));
+    s.handle(host, { type: "endRound" });
+    s.disconnect(max);
+    advance(RECONNECT_MS);
+    s.tick();
+    assert.equal(s.phase, "decide");
+    // Eve's page has to offer her the pick: she gets the decision again, after the state that makes her leader
+    assert.equal(all(eve, "decide").length, 2);
+    s.handle(eve, { type: "pick", index: 0, playerId: id(eve) });
+    s.handle(host, { type: "pick", index: 0, playerId: id(ida) });
+    assert.deepEqual(last(host, "reveal").teams.map(t => [t.id, t.picked]), [[0, id(ida)], [1, id(eve)]]);
+});
+
+test("team play leader: who comes back during the decision gets the round, the decision and the team's guesses", () => {
+    const { s, host, ida, eve, last } = leaderGame();
+    s.handle(ida, south(0));
+    s.handle(eve, south(0));
+    s.handle(host, { type: "endRound" });
+    s.disconnect(ida);
+    const phone = {};
+    s.join(phone, { token: last(ida, "welcome").token });
+    assert.equal(last(phone, "state").phase, "decide");
+    assert.deepEqual([last(phone, "round").index, last(phone, "round").deadline], [0, null]);
+    assert.equal(last(phone, "decide").index, 0);
+    assert.deepEqual(last(phone, "teamGuesses").guesses.map(g => g.name), ["Ida"]);
+});
+
+test("team play leader: a leader who reloads before picking can still pick; one who picked cannot again", () => {
+    const { s, host, ida, eve, all, last } = leaderGame();
+    const idaId = last(ida, "welcome").playerId;
+    s.handle(ida, south(0));
+    s.handle(eve, south(0));
+    s.handle(host, { type: "endRound" });
+    s.disconnect(host);
+    const reloaded = {};
+    s.join(reloaded, { token: last(host, "welcome").token });
+    s.handle(reloaded, { type: "pick", index: 0, playerId: idaId });
+    assert.deepEqual(all(reloaded, "error"), []);
+    s.handle(reloaded, { type: "pick", index: 0, playerId: idaId });
+    assert.equal(last(reloaded, "error").code, "INVALID");
+});
+
+test("team play leader: images reported during the decision count for the next round", () => {
+    const { s, host, max, ida, eve, last } = leaderGame();
+    const id = (conn) => last(conn, "welcome").playerId;
+    s.handle(ida, south(0));
+    s.handle(eve, south(0));
+    s.handle(host, { type: "endRound" });
+    readyAll(s, 1);
+    s.handle(host, { type: "pick", index: 0, playerId: id(ida) });
+    s.handle(max, { type: "pick", index: 0, playerId: id(eve) });
+    s.handle(host, { type: "next" });
+    // nobody is waited for: everyone had round 2's images already
+    assert.equal(s.phase, "round");
+});
+
+test("team play leader: who takes a team over because its leader left during the decision gets the decision, nobody else does again", () => {
+    const { s, sent, host, max, ida, eve, all } = leaderGame({ ...LEADER, decide: 60 });
+    s.handle(ida, south(0));
+    s.handle(eve, south(0));
+    s.handle(host, { type: "endRound" });
+    s.handle(max, { type: "leave" });
+    assert.deepEqual(sent.filter(x => x.conn === eve).slice(-3).map(x => x.msg.type), ["state", "teamGuesses", "decide"]);
+    // Hans leads already and may be picking: a second decision would wipe his selection
+    assert.equal(all(host, "decide").length, 1);
 });

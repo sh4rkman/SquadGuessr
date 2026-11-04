@@ -73,7 +73,14 @@
             "rounds": "Rounds",
             "next": "Next round",
             "nextHint": "When the next round starts after the reveal. Host: when you press NEXT. Auto: by itself for everyone once the chosen time is up.",
-            "codeHint": "Whether PLAY AGAIN gives the next game a new invite code. Keep: the invite code and its links stay the same until the lobby has been empty for a while."
+            "codeHint": "Whether PLAY AGAIN gives the next game a new invite code. Keep: the invite code and its links stay the same until the lobby has been empty for a while.",
+            "team": "Teams",
+            "teamHint": "Play in teams. Sum: everyone guesses, a team scores the sum of its players, so all teams have the same size. Midpoint: everyone guesses, a team plays the midpoint of its guesses. Leader: the members guess, the leader picks one of their guesses for the team.",
+            "teams": "Number of teams",
+            "penalty": "Minus points",
+            "penaltyHint": "Guesses that would score nothing cost up to 50 points (the further off, the more), and so does giving no answer.",
+            "decide": "Decision time",
+            "decideHint": "How long the leaders have after the round to pick one of their team guesses."
         },
         "gameRunning": "This game has already started. You can still watch it.",
         "ended": "This game is already over.",
@@ -97,9 +104,13 @@
         "makeHost": "Make {{name}} host",
         "nowHost": "You are now the host",
         "noLongerHost": "You are no longer the host",
+        "nowLeader": "You are now the leader of {{team}}",
+        "nowIn": "You are now in {{team}}",
+        "shuffled": "The host shuffled the teams",
         "confirm": {
             "kick": "Remove {{name}} from the session?",
-            "promote": "Make {{name}} the host? You will be a regular player then."
+            "promote": "Make {{name}} the host? You will be a regular player then.",
+            "lead": "Make {{name}} the leader of your team? You will guess yourself then."
         },
         "confirmLeave": "Leave the lobby? You will need the invite code to come back.",
         "joined": "{{name}} joined the lobby",
@@ -120,7 +131,9 @@
             "leave": "LEAVE",
             "endRound": "END ROUND",
             "watch": "WATCH",
-            "rejoin": "REJOIN"
+            "rejoin": "REJOIN",
+            "shuffle": "SHUFFLE",
+            "pick": "PICK"
         },
         "errors": {
             "SESSION_NOT_FOUND": "Session not found",
@@ -137,7 +150,38 @@
             "NO_PLAYERS": "At least one other player has to join first",
             "KICKED": "The host removed you from the session. You can join again in {{seconds}} s",
             "CHAT_TOO_FAST": "Too fast, wait a moment"
-        }
+        },
+        "teamModes": {
+            "off": "Off",
+            "sum": "Sum",
+            "centroid": "Midpoint",
+            "leader": "Leader"
+        },
+        "on": "On",
+        "off": "Off",
+        "teamCount": "{{n}} teams",
+        "teamName": "Team {{name}}",
+        "teamNames": {
+            "0": "Yellow",
+            "1": "Purple",
+            "2": "Orange",
+            "3": "Teal",
+            "4": "Pink",
+            "5": "Black",
+            "6": "White",
+            "7": "Brown",
+            "8": "Lime",
+            "9": "Gray"
+        },
+        "needTeams": {
+            "sum": "At least two teams need players, all of the same size",
+            "centroid": "At least two teams need players",
+            "leader": "At least two teams need players, and three in every team"
+        },
+        "makeLeader": "Make {{name}} leader",
+        "teamGuessing": "Your team is guessing ({{answered}}/{{total}})",
+        "pickGuess": "Pick the guess for your team",
+        "leadersDeciding": "Leaders are deciding ({{picked}}/{{total}})"
     },
     "submit": {
         "open": "SUBMIT A GUESS",

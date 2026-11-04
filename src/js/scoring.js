@@ -31,6 +31,19 @@ export function pointsForDistance(distance, size) {
     return { points: 0, icon: "... ❌" };
 }
 
+// team play's minus points: the most a far guess (or giving no answer) can cost
+export const MAX_PENALTY = 50;
+
+/**
+ * Minus points for a guess beyond the last scoring step: 0 at its edge, down to −MAX_PENALTY at three times its distance
+ */
+export function penaltyPoints(distance, size) {
+    const zone = BASE_STEPS.at(-1).maxDistance * size / 3000;
+    const points = Math.round(MAX_PENALTY * Math.min(1, Math.max(0, distance - zone) / (2 * zone)));
+    // inside the zone 0, not -0
+    return points ? -points : 0;
+}
+
 /**
  * Plain edit distance between two strings
  */
@@ -75,6 +88,14 @@ export function mapNameMatches(answer, mapName) {
 
 export function distance(a, b) {
     return Math.hypot(a.lat - b.lat, a.lng - b.lng);
+}
+
+/**
+ * The plain average position of some guesses, in game coordinates
+ */
+export function centroid(points) {
+    const mean = key => points.reduce((sum, p) => sum + p[key], 0) / points.length;
+    return { lat: mean("lat"), lng: mean("lng") };
 }
 
 export function mapSize(mapName) {
