@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { scoreAnswer, mapSize } from "../src/js/scoring.js";
+import { scoreAnswer, mapSize, speedBonus } from "../src/js/scoring.js";
 import { CHAT_MAX, CHAT_GAP_MS, CHAT_HISTORY } from "../src/js/chatLimits.js";
 import { cleanName, cleanText, validSettings, validGuesses, validAnswer } from "./validate.js";
 
@@ -385,7 +385,10 @@ export class Session {
         const answer = this.settings.mode === "classic"
             ? { lat: clamp(msg.lat, -size, 0), lng: clamp(msg.lng, 0, size), mapName: null }
             : { lat: null, lng: null, mapName: msg.mapName };
-        player.answers[this.round] = { ...answer, ...scoreAnswer(this.settings.mode, this.guesses[this.round], answer) };
+        const scored = scoreAnswer(this.settings.mode, this.guesses[this.round], answer);
+        // timed by the server's own clock against the deadline, so no client can claim to have been quick
+        const bonus = this.settings.speedBonus ? speedBonus(scored.points, (this.deadline - this.now()) / (this.settings.timer * 1000)) : 0;
+        player.answers[this.round] = { ...answer, ...scored, bonus };
         this.catchUp(player);
         this.broadcastState();
         this.checkRoundEnd();
@@ -427,8 +430,8 @@ export class Session {
         this.deadline = null;
         this.nextAt = this.settings.next ? this.now() + this.settings.next * 1000 : null;
         this.players.forEach(p => {
-            if (!p.answers[this.round]) p.answers[this.round] = { lat: null, lng: null, mapName: null, distance: null, points: 0 };
-            p.score += p.answers[this.round].points;
+            if (!p.answers[this.round]) p.answers[this.round] = { lat: null, lng: null, mapName: null, distance: null, points: 0, bonus: 0 };
+            p.score += p.answers[this.round].points + p.answers[this.round].bonus;
         });
         this.broadcastState();
         this.broadcast(this.revealMsg());
@@ -700,8 +703,9 @@ export class Session {
     }
 }
 
-function pickSettings({ mode, timer, rounds, next = 0, keepCode = false }) {
-    return { mode, timer, rounds, next, keepCode };
+function pickSettings({ mode, timer, rounds, next = 0, keepCode = false, speedBonus = false }) {
+    // the speed bonus counts the time left: without a timer there is none
+    return { mode, timer, rounds, next, keepCode, speedBonus: speedBonus && timer > 0 };
 }
 
 function clamp(value, min, max) {

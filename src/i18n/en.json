@@ -17,6 +17,8 @@
         "takeYourTime": "Take your time",
         "oneMinutePerGuess": "1mn per guess",
         "fifteenSecondsPerGuess": "15s per guess",
+        "speedBonus": "Speed bonus",
+        "speedBonusHint": "Quick answers: up to 25% extra points",
         "buttons": {
             "back": "BACK",
             "play": "PLAY",
@@ -69,6 +71,8 @@
         "nextAuto": "Auto",
         "codeNew": "New each game",
         "codeKeep": "Keep",
+        "off": "Off",
+        "on": "On",
         "settings": {
             "rounds": "Rounds",
             "next": "Next round",

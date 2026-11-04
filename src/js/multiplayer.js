@@ -6,7 +6,7 @@ import { updateOffset, secondsUntil } from "./clock.js";
 import { copyText } from "./clipboard.js";
 import Preloader from "./preloader.js";
 import { findMap, basemapUrl } from "./data/maps.js";
-import { rankMoves } from "./scoring.js";
+import { rankMoves, bonusText } from "./scoring.js";
 import { CHAT_MAX, CHAT_GAP_MS, CHAT_HISTORY } from "./chatLimits.js";
 
 const RETRY_DELAYS = [1000, 2000, 5000];
@@ -187,6 +187,8 @@ export default class Multiplayer {
             // 0: the host moves on with NEXT
             next: $("#mpNext").val() === "auto" ? Number($("#mpNextDelay").val()) : 0,
             keepCode: $("#mpKeepCode").val() === "1",
+            // the server turns it off for chill
+            speedBonus: $("#mpSpeedBonus").val() === "1",
         };
     }
 
@@ -558,6 +560,9 @@ export default class Multiplayer {
         $("#mpNextDelay").prop("hidden", !next);
         if (next) $("#mpNextDelay").val(String(next));
         $("#mpKeepCode").val(s.settings.keepCode ? "1" : "0");
+        $("#mpSpeedBonus").val(s.settings.speedBonus ? "1" : "0");
+        // the speed bonus counts the time left: chill has none
+        $("label[for=mpSpeedBonus], #mpSpeedBonus").prop("hidden", !timer);
         $("#mpSettingsSummary").text(this.describeSettings(s.settings));
         this.renderPlayers(s);
 
@@ -772,7 +777,7 @@ export default class Multiplayer {
 
     startCountdown(deadline) {
         clearInterval(this.countdown);
-        $("#timerWrapper").prop("hidden", !deadline);
+        $("#timerWrapper").prop("hidden", !deadline).toggleClass("bonus", Boolean(this.state.settings.speedBonus));
         if (!deadline) return;
 
         const tick = () => {
@@ -850,7 +855,7 @@ export default class Multiplayer {
 
         if (mine) {
             $("#dist").text(mine.distance === null ? "—" : app.formatDistance(mine.distance));
-            $("#points").text(mine.points);
+            $("#points").text(mine.points + bonusText(mine.bonus));
             $("#text").css("visibility", "visible");
         }
         const mapLabel = solution.map.charAt(0).toUpperCase() + solution.map.slice(1);
@@ -900,7 +905,8 @@ export default class Multiplayer {
     addPlayerMarker(result, options = {}) {
         const mm = this.app.minimap;
         const label = document.createElement("span");
-        label.textContent = `${result.name} +${result.points}`;
+        // the sum only, with ⚡ for a bonus: the tag stays short, the ranking has the breakdown
+        label.textContent = `${result.name} +${result.points + (result.bonus ?? 0)}${result.bonus ? "⚡" : ""}`;
         return new guessMarker(this.toMap(result), { draggable: false, ...options }, mm)
             .addTo(mm.markersGroup)
             .bindTooltip(label, { permanent: true, direction: "top", offset: [0, -45], className: "mpTooltip" });
@@ -1003,7 +1009,7 @@ export default class Multiplayer {
                     $("<span class=\"rank\">").text(winners.includes(row.id) ? "🏆" : `${i + 1}.`),
                     $move,
                     $("<span class=\"name\">").text(row.name),
-                    $("<span class=\"points\">").text(row.points === undefined ? "" : `+${row.points}`),
+                    $("<span class=\"points\">").text(row.points === undefined ? "" : `+${row.points}${bonusText(row.bonus)}`),
                     $("<span class=\"score\">").text(row.score)
                 )
                 .appendTo($list);
@@ -1074,14 +1080,15 @@ export default class Multiplayer {
         if (open && matchMedia("(pointer: fine)").matches) $("#mpChatInput").trigger("focus");
     }
 
-    describeSettings({ mode, timer, rounds, next, keepCode }) {
+    describeSettings({ mode, timer, rounds, next, keepCode, speedBonus }) {
         const t = (key) => i18next.t(key, { ns: "common" });
         const modeLabel = mode === "classic" ? t("menu.classic") : t("menu.findMap");
         const timerLabel = { 0: t("timer.chill"), 60: t("timer.timedOption") }[timer] ?? `${t("timer.rush")} ${timer}\u00a0s`;
         // a no-break space keeps "10 s" together when the summary wraps
         const nextLabel = next ? ` · ${t("mp.settings.next")}: ${t("mp.nextAuto")} ${next}\u00a0s` : "";
         const codeLabel = keepCode ? ` · ${t("mp.code")}: ${t("mp.codeKeep")}` : "";
-        return `${modeLabel} · ${timerLabel} · ${rounds} ${t("mp.rounds")}${nextLabel}${codeLabel}`;
+        const bonusLabel = speedBonus ? ` · ⚡ ${t("timer.speedBonus")}` : "";
+        return `${modeLabel} · ${timerLabel}${bonusLabel} · ${rounds} ${t("mp.rounds")}${nextLabel}${codeLabel}`;
     }
 
     showEntry() {

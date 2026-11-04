@@ -4,7 +4,7 @@ import { Session, MAX_PLAYERS, RECONNECT_MS, LOAD_FIRST_MS, LOAD_MS, COUNTDOWN_R
 import { CHAT_MAX, CHAT_GAP_MS, CHAT_HISTORY } from "../src/js/chatLimits.js";
 import { mapSize } from "../src/js/scoring.js";
 
-const CLASSIC = { mode: "classic", timer: 0, rounds: 3, next: 0, keepCode: false };
+const CLASSIC = { mode: "classic", timer: 0, rounds: 3, next: 0, keepCode: false, speedBonus: false };
 const GUESSES = [
     { map: "Narva", url: "/img/guesses/a.webp", lat: -100, lng: 200, submitter: "Dan" },
     { map: "GooseBay", url: "/img/guesses/b.webp", lat: -300, lng: 400 },
@@ -143,13 +143,14 @@ test("only the host may control the game", () => {
 test("host can change settings in the lobby", () => {
     const { s, host, guest, last } = withGuest();
     s.handle(host, { type: "settings", settings: { mode: "mapFinder", timer: 20, rounds: 5, next: 15 } });
-    assert.deepEqual(last(guest, "state").settings, { mode: "mapFinder", timer: 20, rounds: 5, next: 15, keepCode: false });
+    assert.deepEqual(last(guest, "state").settings, { mode: "mapFinder", timer: 20, rounds: 5, next: 15, keepCode: false, speedBonus: false });
 });
 
-test("settings without next or keepCode (an older cached client) leave the next round to the host and renew the code", () => {
+test("settings without next, keepCode or speedBonus (an older cached client) leave the next round to the host, renew the code and give no bonus", () => {
     const { last, host } = setup({ mode: "classic", timer: 0, rounds: 3 });
     assert.equal(last(host, "state").settings.next, 0);
     assert.equal(last(host, "state").settings.keepCode, false);
+    assert.equal(last(host, "state").settings.speedBonus, false);
 });
 
 test("start rejects guesses that do not match settings.rounds", () => {
@@ -251,6 +252,37 @@ test("host cannot end a timed round early; it ends when the timer runs out", () 
     advance(61_000);
     s.tick();
     assert.equal(s.phase, "reveal");
+});
+
+test("speed bonus: the server times each answer against its own deadline and adds it to the score", () => {
+    const { s, host, guest, last, advance } = started({ mode: "classic", timer: 60, rounds: 3, speedBonus: true });
+    // a perfect answer with 45 of 60 s left: 25 × 0.75
+    advance(15_000);
+    s.handle(host, { type: "answer", index: s.round, lat: -100, lng: 200 });
+    // just as perfect, but in the grace second after the deadline
+    advance(45_500);
+    s.handle(guest, { type: "answer", index: s.round, lat: -100, lng: 200 });
+    const results = last(host, "reveal").results;
+    const hans = results.find(r => r.name === "Hans");
+    const max = results.find(r => r.name === "Max");
+    assert.deepEqual([hans.points, hans.bonus, hans.score], [100, 19, 119]);
+    assert.deepEqual([max.points, max.bonus, max.score], [100, 0, 100]);
+});
+
+test("speed bonus: none without the option, and none for whoever did not answer", () => {
+    const { s, host, last, advance } = started({ mode: "classic", timer: 60, rounds: 3 });
+    s.handle(host, { type: "answer", index: s.round, lat: -100, lng: 200 });
+    advance(61_000);
+    s.tick();
+    const results = last(host, "reveal").results;
+    assert.deepEqual(results.map(r => [r.name, r.bonus, r.score]), [["Hans", 0, 100], ["Max", 0, 0]]);
+});
+
+test("speed bonus: off whenever the round has no timer, so the lobby never shows it for chill", () => {
+    const { s, host, last } = setup({ ...CLASSIC, speedBonus: true });
+    assert.equal(last(host, "state").settings.speedBonus, false);
+    s.handle(host, { type: "settings", settings: { ...CLASSIC, timer: 15, speedBonus: true } });
+    assert.equal(last(host, "state").settings.speedBonus, true);
 });
 
 test("mapFinder answers are scored by map name", () => {

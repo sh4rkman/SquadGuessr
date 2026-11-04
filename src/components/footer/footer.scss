@@ -39,6 +39,12 @@ footer {
             color: #E63435;
             animation: timer-pulse 1s ease-in-out infinite;
         }
+        // the speed bonus is on: being quick pays
+        &.bonus::before {
+            content: "⚡";
+            font-size: 0.6em;
+            vertical-align: middle;
+        }
     }
 
     #footerLogos {

@@ -124,6 +124,12 @@ test("validSettings: keepCode is a boolean, and an older cached client sends non
     ["true", 1, null].forEach(keepCode => assert.equal(settings({ keepCode }), false, `keepCode ${keepCode}`));
 });
 
+test("validSettings: speedBonus is a boolean, and an older cached client sends none", () => {
+    const settings = (over) => validSettings({ mode: "classic", timer: 60, rounds: 5, ...over });
+    [true, false, undefined].forEach(speedBonus => assert.equal(settings({ speedBonus }), true, `speedBonus ${speedBonus}`));
+    ["true", 1, null].forEach(speedBonus => assert.equal(settings({ speedBonus }), false, `speedBonus ${speedBonus}`));
+});
+
 test("validGuesses checks count and every field", () => {
     assert.equal(validGuesses([guess(), guess(), guess()], 3), true);
     assert.equal(validGuesses([guess({ submitter: "Dan" }), guess({ map: "narva" }), guess({ submitter: null })], 3), true);

@@ -98,6 +98,31 @@
     }
 }
 
+#speedBonusOption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em 0.6em;
+    margin-bottom: 40px;
+    font-size: 1.2em;
+    cursor: pointer;
+    &[hidden] {
+        display: none;
+    }
+    input {
+        width: 1.2em;
+        height: 1.2em;
+        accent-color: variables.$mainColor;
+        cursor: pointer;
+    }
+    small {
+        flex-basis: 100%;
+        font-size: 0.7em;
+        color: #aaa;
+    }
+}
+
 #BUTTON_PLAY {
     padding: 18px 64px;
     //font-size: 2em;

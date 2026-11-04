@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { pointsForDistance, levenshtein, mapNameMatches, distance, mapSize, scoreAnswer, rankMoves } from "../src/js/scoring.js";
+import { pointsForDistance, levenshtein, mapNameMatches, distance, mapSize, scoreAnswer, rankMoves, speedBonus } from "../src/js/scoring.js";
 import { MAPS, initMapsProperties } from "../src/js/data/maps.js";
 
 test("pointsForDistance on a 3000m map", () => {
@@ -92,4 +92,27 @@ test("rankMoves gives equal scores the same place", () => {
         { id: "A", score: 180, points: 80 },
         { id: "B", score: 150, points: 50 },
     ]), { B: "down" });
+});
+
+test("speedBonus: a quarter of the points once more, scaled by the share of time left", () => {
+    assert.equal(speedBonus(100, 1), 25);
+    assert.equal(speedBonus(100, 0.5), 13);
+    assert.equal(speedBonus(85, 0.5), 11);
+    assert.equal(speedBonus(60, 1), 15);
+    assert.equal(speedBonus(30, 1), 8);
+    assert.equal(speedBonus(0, 1), 0);
+    assert.equal(speedBonus(100, 0), 0);
+});
+
+test("speedBonus: the time left counts as 0–1, so an answer in the grace second gets nothing", () => {
+    assert.equal(speedBonus(100, -0.02), 0);
+    assert.equal(speedBonus(100, 1.01), 25);
+});
+
+test("rankMoves counts the speed bonus as part of the round", () => {
+    // before: B 150, A 140; A passes B only thanks to the bonus
+    assert.deepEqual(rankMoves([
+        { id: "A", score: 245, points: 90, bonus: 15 },
+        { id: "B", score: 240, points: 90, bonus: 0 },
+    ]), { A: "up", B: "down" });
 });

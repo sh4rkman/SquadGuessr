@@ -94,6 +94,24 @@ export function scoreAnswer(mode, guess, answer) {
     return { distance: d, points: pointsForDistance(d, mapSize(guess.map)).points };
 }
 
+// the speed bonus is at most this share of the points: the less accurate the answer, the less a quick one earns
+const BONUS_SHARE = 0.25;
+
+/**
+ * Extra points for a quick answer: BONUS_SHARE of the points once more, scaled by the share of time `left` (0–1).
+ * At most 25 on top of a perfect 100
+ */
+export function speedBonus(points, left) {
+    return Math.round(points * BONUS_SHARE * Math.min(1, Math.max(0, left)));
+}
+
+/**
+ * The bonus as shown after a round's points ("96 ⚡+21"), nothing when there is none
+ */
+export function bonusText(bonus) {
+    return bonus ? ` ⚡+${bonus}` : "";
+}
+
 /**
  * Who moved up or down with this round's points: { id: "up" | "down" }, unmoved players left out.
  * A place is 1 + the number of players ahead, so equal scores share it and the sort order of a tie moves nobody
@@ -101,7 +119,7 @@ export function scoreAnswer(mode, guess, answer) {
 export function rankMoves(results) {
     const place = (score, scores) => scores.filter(s => s > score).length;
     const after = results.map(r => r.score);
-    const before = results.map(r => r.score - r.points);
+    const before = results.map(r => r.score - r.points - (r.bonus ?? 0));
     const moves = {};
     results.forEach((r, i) => {
         const change = place(before[i], before) - place(after[i], after);

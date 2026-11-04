@@ -17,6 +17,8 @@
         "takeYourTime": "慢慢来",
         "oneMinutePerGuess": "每次猜测1分钟",
         "fifteenSecondsPerGuess": "每次猜测15秒",
+        "speedBonus": "速度奖励",
+        "speedBonusHint": "快速作答：最多额外获得 25% 的分数",
         "buttons": {
             "back": "返回",
             "play": "开始游戏",
@@ -69,6 +71,8 @@
         "nextAuto": "自动",
         "codeNew": "每局更换",
         "codeKeep": "保留",
+        "off": "关闭",
+        "on": "开启",
         "settings": {
             "rounds": "轮数",
             "next": "下一轮",

@@ -62,10 +62,11 @@ export function cleanText(text, max) {
 }
 
 export function validSettings(s) {
-    // an older cached client sends no next and no keepCode
+    // an older cached client sends no next, keepCode or speedBonus
     return Boolean(s) && MODES.includes(s.mode) && TIMERS.includes(s.timer) && ROUNDS.includes(s.rounds)
         && (s.next === undefined || NEXTS.includes(s.next))
-        && (s.keepCode === undefined || typeof s.keepCode === "boolean");
+        && (s.keepCode === undefined || typeof s.keepCode === "boolean")
+        && (s.speedBonus === undefined || typeof s.speedBonus === "boolean");
 }
 
 export function validGuesses(guesses, rounds) {
