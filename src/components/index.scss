@@ -1,3 +1,8 @@
+html {
+    // no pinch or double-tap zoom of the whole page; the maps and the hint overlay zoom themselves
+    touch-action: pan-x pan-y;
+}
+
 main {
     height: 80dvh;
     background: rgb(22, 22, 22);
@@ -15,25 +20,19 @@ main {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     z-index: 9999;
-    cursor: pointer;
 
     &.hidden {
         display: none;
     }
 
-    .imageWrapper {
-        position: relative; // 👈 important
-        display: inline-block;
+    #overlayImage {
+        width: 100%;
+        height: 100%;
+        background: transparent;
     }
 
-    img {
-        display: block;
-        max-width: 90vw;
-        max-height: 90dvh;
+    .leaflet-image-layer {
         border-radius: 20px;
     }
 
@@ -41,6 +40,7 @@ main {
         position: absolute;
         top: 10px;
         right: 10px;
+        z-index: 1000; // above the leaflet panes
         width: 30px;
         height: 30px;
         background: rgba(54, 54, 54, 0.8);

@@ -103,6 +103,9 @@ Map.SmoothWheelZoom = Handler.extend({
             this._center = map.unproject(map.project(this._wheelMouseLatLng, this._zoom).subtract(delta), this._zoom); //Patch
         }
 
+        // _move ignores maxBounds, so moveend would pan the view back afterwards: keep it inside while zooming
+        if (map.options.maxBounds) this._center = map._limitCenter(this._center, this._zoom, map.options.maxBounds);
+
         if (!this._moved) {
             map._moveStart(true, false);
             this._moved = true;

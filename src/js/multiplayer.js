@@ -804,6 +804,7 @@ export default class Multiplayer {
 
         clearInterval(this.countdown);
         app.stopTimer();
+        app.closeImageOverlay();
         app.selectedMode = this.state.settings.mode;
         // before any map sizing: on the big screen the reveal gives the map most of the width
         $("body").addClass("mp-reveal");

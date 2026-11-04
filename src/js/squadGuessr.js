@@ -1,7 +1,7 @@
 import { MAPS, initMapsProperties, findMap } from "./data/maps.js";
 import { squadMinimap } from "./squadMinimap.js";
 import { loadLanguage } from "../i18n/i18n.js";
-import { Polyline, LatLngBounds } from "leaflet";
+import { Polyline, LatLngBounds, LeafletMap, CRS, ImageOverlay } from "leaflet";
 import SquadSettings from "./squadSettings.js";
 import packageInfo from "../../package.json";
 import i18next from "i18next";
@@ -211,21 +211,54 @@ export default class SquadGuessr {
         const icon = document.querySelector(".preview-icon");
         const hint = document.getElementById("hint");
         const overlay = document.getElementById("imageOverlay");
-        const overlayImg = document.getElementById("overlayImage");
+        let viewer;
 
+        // iOS Safari ignores user-scalable=no in the viewport: without this a pinch still zooms the whole page
+        document.addEventListener("gesturestart", (e) => e.preventDefault());
+
+        // the hint gets its own small map, so a pinch zooms the picture instead of the page and closing drops that zoom
         const showOverlay = () => {
-            overlayImg.src = hint.src;
+            if (viewer || !hint.naturalWidth) return;
             overlay.classList.remove("hidden");
+            const bounds = new LatLngBounds([0, 0], [hint.naturalHeight, hint.naturalWidth]);
+            // fit into 90% of the screen, but never larger than the image itself
+            const fitZoom = () => Math.min(0, Math.log2(0.9 * Math.min(
+                overlay.clientWidth / hint.naturalWidth, overlay.clientHeight / hint.naturalHeight)));
+            const fitView = () => viewer.setMinZoom(fitZoom()).setView(bounds.getCenter(), viewer.getMinZoom());
+            viewer = new LeafletMap("overlayImage", {
+                crs: CRS.Simple,
+                attributionControl: false,
+                zoomControl: false,
+                doubleClickZoom: false, // the first tap already closes
+                scrollWheelZoom: false, // smoothWheelZoom (squadMinimap's plugin, on for every map) does the wheel
+                zoomSnap: 0,
+                maxZoom: 2,
+                maxBounds: bounds,
+                maxBoundsViscosity: 1,
+            });
+            fitView();
+            new ImageOverlay(hint.src, bounds).addTo(viewer);
+            viewer.on("click", this.closeImageOverlay);
+            // a rotated phone or resized window: refit, but keep a zoomed-in view and only move the zoom-out limit
+            viewer.on("resize", () => {
+                if (viewer.getZoom() > viewer.getMinZoom()) viewer.setMinZoom(fitZoom());
+                else fitView();
+            });
         };
 
-        const hideOverlay = () => overlay.classList.add("hidden");
+        // also when the round ends, the next picture comes or the page changes: never over the solution or an old hint
+        this.closeImageOverlay = () => {
+            overlay.classList.add("hidden");
+            viewer?.remove();
+            viewer = null;
+        };
 
         icon?.addEventListener("click", showOverlay);
         hint?.addEventListener("click", showOverlay);
-        overlay?.addEventListener("click", hideOverlay);
+        document.getElementById("closeButton").addEventListener("click", this.closeImageOverlay);
 
         document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") hideOverlay();
+            if (e.key === "Escape") this.closeImageOverlay();
         });
     }
 
@@ -380,6 +413,7 @@ export default class SquadGuessr {
         let failures = 0;
 
         clearTimeout(this.hintRetry);
+        this.closeImageOverlay();
         // whoever still waits on the replaced hint (multiplayer preloading of the next round) must not hang forever
         if (this.hintSettled) this.hintSettled();
         $hint.off("load error");
@@ -429,6 +463,7 @@ export default class SquadGuessr {
         if (!this.currentGuess) return;
 
         this.stopTimer();
+        this.closeImageOverlay();
 
         if (this.selectedMode === "mapFinder") {
             this.handleMapGuess();
@@ -628,6 +663,7 @@ export default class SquadGuessr {
         $("#score").prop("hidden", state.scoreHidden);
         $("#mapName").hide();
         this.stopTimer();
+        this.closeImageOverlay();
     }
 
     selectMode(mode) {

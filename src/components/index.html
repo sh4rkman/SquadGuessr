@@ -6,7 +6,7 @@
             <title>SquadGuessr</title>
 
             <meta data-i18n-content="common:desc" name="description" content="">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
             <meta name="theme-color" content="#111">
             <meta charset="utf-8">
 
@@ -54,10 +54,8 @@
             <%= require('html-loader!./footer/footer.html').default %>
             
             <div id="imageOverlay" class="hidden">
-                <div class="imageWrapper">
-                    <img id="overlayImage">
-                    <span id="closeButton">×</span>
-                </div>
+                <div id="overlayImage"></div>
+                <span id="closeButton">×</span>
             </div>
 
         </body>
