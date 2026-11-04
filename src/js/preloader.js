@@ -28,6 +28,7 @@ export default class Preloader {
     /**
      * Loads the urls one after another (each starts after the previous one's first attempt, so they do not share
      * the bandwidth) and resolves once all of them loaded. A failed one is retried in the background (see retryDelay).
+     * Asked for again without `low`, a low one waiting for its retry is tried at once.
      */
     load(urls, { low = false } = {}) {
         return Promise.all(urls.map((url) => {
@@ -37,6 +38,16 @@ export default class Preloader {
                 entry.loaded = new Promise((resolve) => { entry.resolve = resolve; });
                 this.entries.set(url, entry);
                 this.queue = this.queue.then(() => this.attempt(entry));
+            }
+            else if (!low && entry.low) {
+                // the round now waits for it: its later attempts are no longer low priority, and one waiting out the
+                // backoff of up to 10 s left over from the preload tries again at once, beside the queue
+                entry.low = false;
+                if (entry.timer !== null) {
+                    this.clearTimer(entry.timer);
+                    entry.failures = 0;
+                    this.attempt(entry);
+                }
             }
             return entry.loaded;
         }));
@@ -61,6 +72,7 @@ export default class Preloader {
      */
     attempt(entry) {
         return new Promise((settled) => {
+            entry.timer = null;
             if (entry.dropped) return settled();
             entry.settle = settled;
             const img = this.createImage();
