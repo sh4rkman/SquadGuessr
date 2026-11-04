@@ -631,6 +631,8 @@ export default class Multiplayer {
             $("#mpStatus").text(i18next.t("mp.waitingForHost", { ns: "common" })).prop("hidden", host || (last && !this.watching));
         }
         if (s.phase !== "round") return;
+        // a new round's state comes just before its round message: until that, the last reveal stays as it is
+        if (s.round !== this.roundIndex) return;
         const online = s.players.filter(p => p.connected);
         const text = i18next.t("mp.waitingForPlayers", {
             ns: "common",
@@ -638,6 +640,17 @@ export default class Multiplayer {
             total: online.length,
         });
         $("#mpStatus").text(text).prop("hidden", !this.answered && !this.watching);
+        // locked in, and on the big screen all along: the standings so far instead of the chips
+        const standings = this.answered || this.watching;
+        const $list = $("#mpRanking");
+        const shown = standings && $list.prop("hidden");
+        if (standings) {
+            this.renderRanking($list, [...s.players].sort((a, b) => b.score - a.score));
+            this.markRanking(s);
+        }
+        $list.prop("hidden", !standings);
+        // just shown: the own line in view, not where the last reveal was scrolled to (later states keep the place)
+        if (shown) this.showOwnLine($list);
     }
 
     /**
@@ -862,11 +875,30 @@ export default class Multiplayer {
 
         // round 1 has no places to leave: everybody started at 0
         this.renderRanking($("#mpRanking"), msg.results, [], msg.index > 0 ? rankMoves(msg.results) : {});
+        // the state of the reveal came just before it
+        this.markRanking(this.state);
         $("#mpRanking").prop("hidden", false);
 
         app.INPUT_GUESS.prop("hidden", true);
         app.BUTTON_GUESS.prop("hidden", true);
         this.renderStatus();
+        // a new order: the own line in view again, wherever the list was scrolled to while waiting. Last, once the
+        // buttons are settled: on phones they decide how high the list is
+        this.showOwnLine($("#mpRanking"));
+    }
+
+    /**
+     * Scrolls a ranking that just came up so the own line is in the middle of it, or the list starts at the top when
+     * the own line is near it anyway (and on the big screen, which has none)
+     */
+    showOwnLine($list) {
+        const list = $list[0];
+        list.scrollTop = 0;
+        const me = list.querySelector(".me");
+        if (!me) return;
+        const top = me.getBoundingClientRect().top - list.getBoundingClientRect().top;
+        // the browser keeps it between 0 and the end
+        list.scrollTop = top - (list.clientHeight - me.offsetHeight) / 2;
     }
 
     /**
@@ -964,11 +996,19 @@ export default class Multiplayer {
             if (p.connected && p.back !== false) $li.append(button("promote", "🔑", "mp.makeHost"));
             return $li.append(button("kick", "✕", "mp.kick"));
         }));
-        // the reveal ranking hides the chips (lobby.scss), so while the next round loads it carries the marks itself
+        this.markRanking(s);
+    }
+
+    /**
+     * The ranking hides the chips (lobby.scss), so it carries what they show itself: the marks, in front of the name
+     * (the ranking cuts long names off with an ellipsis, which would hide a mark behind them), and who dropped out
+     */
+    markRanking(s) {
         $("#mpRanking li").each((_, li) => {
             const p = s.players.find(x => x.id === li.dataset.id);
-            // in front of the name: the ranking cuts long names off with an ellipsis, which would hide a mark behind them
-            if (p) $(li).find(".name").text([this.loadMark(s, p), p.name].filter(Boolean).join(" "));
+            if (!p) return;
+            const name = [this.doneMark(s, p) ? "✓" : "", this.loadMark(s, p), p.name].filter(Boolean).join(" ");
+            $(li).toggleClass("offline", !p.connected).find(".name").text(name);
         });
     }
 
@@ -991,6 +1031,9 @@ export default class Multiplayer {
 
     renderRanking($list, rows, winners = [], moves = {}) {
         $list.empty();
+        // the big screen sizes the lines by their number (lobby.scss); the standings while a round runs have no
+        // +points or moves yet, so their columns go
+        $list.css("--rows", rows.length).toggleClass("standings", rows.every(r => r.points === undefined));
         rows.forEach((row, i) => {
             const move = moves[row.id];
             // always there, empty without a move: the columns of every ranking line up
