@@ -92,3 +92,45 @@ test("keep drops every other image: no more retries, a download that never answe
     await flush();
     assert.deepEqual([failedDone, hangingDone], [false, false]);
 });
+
+test("an urgent load of an image waiting for its retry tries again at once, at normal priority, with the backoff reset", async () => {
+    const { preloader, images, timers, flush, fire } = setup();
+    let done = false;
+    preloader.load(["/next"], { low: true }).then(() => { done = true; });
+    await flush();
+    images[0].onerror();
+    fire();
+    images[1].onerror();
+    assert.equal(timers[0].ms, 2000);
+    preloader.load(["/next"]);
+    assert.equal(timers[0].cleared, true);
+    assert.deepEqual(images.map(i => i.priorityAtStart), ["low", "low", undefined]);
+    images[2].onerror();
+    assert.equal(timers[1].ms, 1000);
+    images[2].onload();
+    await flush();
+    assert.equal(done, true);
+});
+
+test("only the first urgent load cuts the backoff short: asked for again, an urgent image keeps waiting", async () => {
+    const { preloader, images, timers, flush } = setup();
+    preloader.load(["/next"], { low: true });
+    await flush();
+    images[0].onerror();
+    preloader.load(["/next"]);
+    images[1].onerror();
+    preloader.load(["/next"]);
+    assert.equal(images.length, 2);
+    assert.equal(timers.at(-1).cleared, false);
+});
+
+test("a queued low image starts at normal priority once it is asked for urgently", async () => {
+    const { preloader, images, flush } = setup();
+    preloader.load(["/now"]);
+    preloader.load(["/next"], { low: true });
+    preloader.load(["/next"]);
+    await flush();
+    images[0].onload();
+    await flush();
+    assert.deepEqual(images.map(i => i.priorityAtStart), [undefined, undefined]);
+});
