@@ -10,7 +10,7 @@ RUN printf 'SEARCH_ENGINES=%s\nDEV_SERVER_AUTO_OPEN=false\n' "$SEARCH_ENGINES" >
     && npm run build
 
 # ---- static files + reverse proxy for /mp and /api ----
-FROM nginx:1.27-alpine AS web
+FROM nginx:1.30-alpine AS web
 COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 
